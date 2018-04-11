@@ -26,7 +26,7 @@ file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 
 # (5)
-add_executable(gebic_gelatuca gebic_v04_gelatuca_damic_pb_496_dl.cc ${sources} ${headers})
+add_executable(gebic_gelatuca gebic_gelatuca_pb.cc ${sources} ${headers})
 target_link_libraries(gebic_gelatuca ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
 
 # Some compilation variables
