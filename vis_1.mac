@@ -1,0 +1,84 @@
+#################################################################################
+#                                                                              	#
+# 									      	                                    #
+# USE THIS ONLY FOR VISUALIZE DETECTOR AND SOURCES GEOMETRIES                   #
+#                                                                              	#
+#                                                                              	#
+#################################################################################
+#
+#
+#
+#
+#/gemc/det/setTargetDetectLength 100.0 mm
+#/gemc/det/setDetectorMaterial NaI
+# must initialize
+/run/initialize
+/process/em/fluo true
+/process/em/auger true
+/process/em/pixe true
+
+#
+#
+/run/verbose 1
+/event/verbose 1
+/tracking/verbose 1
+/grdm/verbose 1
+
+
+
+#P1
+/gps/particle gamma
+/gps/energy 1173.5 keV
+/gps/pos/type Volume
+/gps/pos/shape Para
+/gps/pos/halfx 75.0 mm
+/gps/pos/halfy 25.5 mm
+/gps/pos/halfz 12.5 mm
+/gps/pos/centre 0. 0. 22.4 mm
+/gps/ang/type iso
+/gps/pos/confine Target1
+/gps/source/intensity 1
+
+
+
+/gps/source/list
+
+
+# create empty scene
+#
+/vis/scene/create
+#
+# Create a scene handler for a specific graphics system
+# (Edit the next line(s) to choose another graphic system)
+#
+#/vis/open DAWNFILE
+#/vis/open OGLIX
+#/vis/open VRML2FILE
+#/vis/open HepRepFile
+/vis/open OGLSQT
+
+#
+#
+# draw scene
+#
+/vis/drawVolume worlds
+/vis/viewer/set/viewpointThetaPhi 30 60 deg
+
+#/vis/viewer/zoom 1.5
+/vis/viewer/flush
+#
+# for drawing the tracks
+# Draw trajectories at end of event, showing trajectory points as
+# markers of size 2 pixels
+#/vis/scene/add/trajectories
+#/vis/modeling/trajectories/create/drawByCharge
+##/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 2
+# (if too many tracks cause core dump => storeTrajectory 0)
+#
+/vis/scene/endOfEventAction accumulate
+/vis/scene/add/trajectories
+#
+# Refresh ready for run
+/vis/viewer/refresh
+
+/run/beamOn 100
