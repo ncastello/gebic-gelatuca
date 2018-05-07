@@ -1,8 +1,8 @@
 /*
  *  gebicEventAction.cc
- *  
  *
- * 
+ *
+ *
  * 	Geant496
  *
  */
@@ -40,9 +40,13 @@ gebicEventAction::~gebicEventAction()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
 
-void gebicEventAction::BeginOfEventAction(const G4Event* )
+void gebicEventAction::BeginOfEventAction(const G4Event* evt)
 {
-  gebicAnalysisManager::GetInstance()->BeginOfEvent();
+    gebicAnalysisManager::GetInstance()->BeginOfEvent();
+    if(evt->GetEventID() % 10000 == 0)
+    {
+        G4cout << "Processed event: "<< evt->GetEventID() << G4endl;
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
@@ -51,5 +55,5 @@ void gebicEventAction::EndOfEventAction(const G4Event*)
 {
   //analysis
   gebicAnalysisManager::GetInstance()->EndOfEvent();
-  
+
 }

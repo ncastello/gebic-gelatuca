@@ -214,7 +214,7 @@ void gebicAnalysisManager::AddEnergy(G4double edep, G4double weight, G4double ti
 void gebicAnalysisManager::AddParticle(G4double pid, G4double energy, G4double weight, G4double time)
 //void gebicAnalysisManager::AddParticle(G4double pid, G4double energy, G4double weight, G4double time, G4int part )
 {
-	G4cout<<"Add particle: "<<pid<<"\t\t"<<energy<<"\t\t"<<weight<<"\t\t"<<time<<G4endl;
+	//G4cout<<"Add particle: "<<pid<<"\t\t"<<energy<<"\t\t"<<weight<<"\t\t"<<time<<G4endl;
 /*
   if(1 < verbose) {
     G4cout << "gemcAnalysisManager::AddParticle: " << pid
@@ -235,7 +235,7 @@ void gebicAnalysisManager::AddParticle(G4double pid, G4double energy, G4double w
 void gebicAnalysisManager::AddIsotope(G4double pid,G4double weight, G4double time)
 //void gebicAnalysisManager::AddIsotope(G4double pid,G4double weight, G4double time, G4int part )
 {
-	G4cout<<"Add isotope: "<<pid<<"\t\t"<<weight<<"\t\t"<<time<<G4endl;
+	//G4cout<<"Add isotope: "<<pid<<"\t\t"<<weight<<"\t\t"<<time<<G4endl;
 	/*
   if(1 < verbose) {
     G4cout << "gemcAnalysisManager::AddIsotope: " << pid

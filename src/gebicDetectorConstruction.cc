@@ -14,12 +14,22 @@
 //GELATUCA in cube (bricks) Pb 20 cm and (cube) Cu 10 cm shields.
 //detector dead zone considered
 //distance between endcap and the bottom of the sample = 9.9 mm in GEANAYET???
+//
+//
 //re-checked
 //measured distance between endcap and Cu ceiling 95.5 mm. In simulation considered 90 mm
-//measured distance between endcap and Cu floor 265 mm. In simulation considered 260 mm.
+// --------------------> NCM It is not 85 mm??????? WHY 90mm??
+//
+//
+//measured distance between endcap and Cu floor 265 mm. In simulation considered 260 mm.  NCM (OK!!)
 //moved all structure so that the 0 of the coordinate system is on endcap
+//
+//
 //fMov = 350/2-90=85 mm
+//
+//
 //Move everything down with fMov (subtract fMov from the z coordinate of all vectors of Cu and Pb shields)
+//
 
 
 #include "gebicDetectorConstruction.hh"
@@ -90,24 +100,24 @@ gebicDetectorConstruction::gebicDetectorConstruction()
  DefaultMatter(0), TarMatter(0), DetectorMatter(0), CapMatter(0),
  VacCryoMatter(0), HolderMatter(0), LayerPbMatter(0), ShieldPbMatter(0), ShieldCuMatter(0)
 {
-  //detectorMessenger = new gebicDetectorMessenger(this);
-	DefineMaterials();
+    //detectorMessenger = new gebicDetectorMessenger(this);
+    DefineMaterials();
 
-	//Dimensions of the World
-	fWorldDiameter	=  900.0*mm;
+	//Dimensions of the World (G4Box)
+    fWorldDiameter	=  900.0*mm;
 	//fWorldLength  = 950.0*mm;
     fWorldLength  = 1050.0*mm;
 
-	//Dimensions of the cryostat
-	fVacCryoExternalDiameter  = 105.0*mm;
-	fVacCryoLength = 196.0*mm;
+    //Dimensions of the cryostat
+    fVacCryoExternalDiameter  = 105.0*mm;
+    fVacCryoLength = 196.0*mm;
 
-	//Dimensions of the cap
-	fCapExternalDiameter = 105.0*mm;
+    //Dimensions of the cap
+    fCapExternalDiameter = 105.0*mm;
 	fCapInternalDiameter  = 100.0*mm;
-	fCapLength  = 196.0*mm;
+    fCapLength  = 196.0*mm;
 	fCapWindowDiameter =  86.6*mm;
-	fCapWindowWidth	  =   1.6*mm;
+    fCapWindowWidth	  =   1.6*mm;
 
 	//Dimensions of the detector (GeLaTuca)
 	fDetectorDiameter  =  81.0*mm;
@@ -116,69 +126,68 @@ gebicDetectorConstruction::gebicDetectorConstruction()
 	fDetectorHoleDiameter  =  14.0*mm;
 	fDetectorHoleLength  =  59.0*mm;
 	fDetectorHoleBulletRadius =  1.0*mm;
-	//fDetectorDeadLayer = 0.5*mm;//dead layer width -- see GeLatuca Canberra docs
-	fDetectorDeadLayer = 0.5*mm; //do not put fDetectorDeadLayer>22. mm!!!!!
+    //fDetectorDeadLayer = 0.5*mm;//dead layer width -- see GeLatuca Canberra docs
+    fDetectorDeadLayer = 0.5*mm; //do not put fDetectorDeadLayer>22. mm!!!!!
 	fDistanceDetectorWindowCap = 3.0*mm;
 
-	//Dimensions of the holder
+    //Dimensions of the holder
 	fHolderExternalDiameter	   =  86.6*mm;
-	fHolderInternalDiameter    =  82.6*mm;
+    fHolderInternalDiameter    =  82.6*mm;
 	//fHolderLength  =  90.0*mm;
-	fHolderBottomWidth =  8.0*mm;
+    fHolderBottomWidth =  8.0*mm;
 	//fHolderOverDetector  =63.6*mm;
-	fDetectorOverHolder = 18.1*mm;
+    fDetectorOverHolder = 18.1*mm;
 	fDetectorOverPb = 8.4*mm;
-	//Dimensions of the Pb layer under the Ge crystal
+    //Dimensions of the Pb layer under the Ge crystal
 	fLayerPbExternalDiameter   =  82.6*mm;
-	fLayerPbInternalDiameter   =   0.0*mm;
+    fLayerPbInternalDiameter   =   0.0*mm;
 	fLayerPbLength			   =  10.0*mm;
-	fHolderLength = fDetectorLength-fDetectorOverHolder+fHolderBottomWidth+fLayerPbLength+fDetectorOverPb;
+    fHolderLength = fDetectorLength-fDetectorOverHolder+fHolderBottomWidth+fLayerPbLength+fDetectorOverPb;
 
 
 	//Dimensions Pb layer around crystal (modified 16/03/2012)
-	fLayerThinPbWidth = 0.3*mm;
+    fLayerThinPbWidth = 0.3*mm;
 	fLayerThinPbL1 = 60.0*mm;
-	fLayerThinPbL2 = 22.0*mm;
+    fLayerThinPbL2 = 22.0*mm;
 	fLayerThinPbL3 = 10.0*mm;
 
-	//Dimensions of the Target(s)
+    //Dimensions of the Target(s) (DAMIC)
     fL1 = 150.0*mm;//x
     fL2 = 50.0*mm;//y
     fL3 = 25.0*mm;//z
 
-
-
-	//Dimensions of the Cu shield
+    //Dimensions of the Cu shield
     fShieldCuDim1 = 500.0*mm;
     fShieldCuDim2 = 400.0*mm;
 	fShieldCuDim3 = 350.0*mm;
-	fShieldCuDim4 = 100.0*mm;
+    fShieldCuDim4 = 100.0*mm;
 
 
-	//Dimensions of the Pb shield
+    //Dimensions of the Pb shield
 	fShieldPbDim1 = 900.0*mm;
-	fShieldPbDim2 = 700.0*mm;
+    fShieldPbDim2 = 700.0*mm;
 	fShieldPbDim3 = 450.0*mm;
-	fShieldPbDim4 = 200.0*mm;
+    fShieldPbDim4 = 200.0*mm;
     fShieldPbDim5 = 400.0*mm;
     fShieldPbDim6 = 300.0*mm;
     fShieldPbDim7 = 250.0*mm;
 
-	fMarinelliInt = 104.0*mm;
+    fMarinelliInt = 104.0*mm;
 	fMarinelliDInt = 113.0*mm;
-	fDistanceEndcapCeiling = 85.0*mm;
+    fDistanceEndcapCeiling = 85.0*mm;
 	fDistanceEndcapFloor = 265.0*mm;
+
 }
 
 
 gebicDetectorConstruction::~gebicDetectorConstruction()
 {
-  //delete detectorMessenger;
+    //delete detectorMessenger;
 }
 
 void gebicDetectorConstruction::DefineMaterials()
 {
-	G4UnitDefinition::BuildUnitsTable();
+    G4UnitDefinition::BuildUnitsTable();
 
 	//Material definition
 	G4String name,symbol;
@@ -188,12 +197,12 @@ void gebicDetectorConstruction::DefineMaterials()
 
 	DefaultMatter = nistman->FindOrBuildMaterial("G4_AIR");
 
-
     TarMatter = nistman->FindOrBuildMaterial("G4_Pb");
 
 	ShieldPbMatter = nistman->FindOrBuildMaterial("G4_Pb");
 	ShieldCuMatter = nistman->FindOrBuildMaterial("G4_Cu");
 	DetectorMatter = nistman->FindOrBuildMaterial("G4_Ge");
+
 	CapMatter = nistman->FindOrBuildMaterial("G4_Al");
 	HolderMatter = nistman->FindOrBuildMaterial("G4_Al");
 	LayerPbMatter = ShieldPbMatter;
@@ -205,12 +214,12 @@ void gebicDetectorConstruction::DefineMaterials()
 
 G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 {
-	// World
+	// ##################### World
 	G4Box* solidWorld= new G4Box("world", fWorldDiameter/2., fWorldDiameter/2., fWorldLength/2.);
 	logicWorld= new G4LogicalVolume(solidWorld, DefaultMatter, "World", 0, 0, 0);
 	physiWorld = new G4PVPlacement(0, G4ThreeVector(), logicWorld, "World", 0, false, 0);
 
-	//Pb shield
+	// ##################### Pb shield
 	G4Box* basePbShield = new G4Box("basePbShield", fShieldPbDim1/2., fShieldPbDim1/2., fShieldPbDim4/2.);
 	G4Box* wallPbShield = new G4Box("wall1PbShield", fShieldPbDim2/2., fShieldPbDim4/2., fShieldPbDim3/2.);
     G4Box* doorPbShield = new G4Box("doorPbShield", fShieldPbDim5/2., fShieldPbDim5/2., fShieldPbDim4/2.);
@@ -224,6 +233,7 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rpb1.rotateX(phiX);
     rpb1.rotateY(phiY);
     rpb1.rotateZ(phiZ);
+
 	//G4ThreeVector tpb1 = G4ThreeVector(0.,0.,(-fWorldLength/2.+fShieldPbDim4/2.));
     G4ThreeVector tpb1 = G4ThreeVector(0.,0.,(-fDistanceEndcapFloor-fShieldCuDim4-fShieldPbDim4/2.));
 	logicPbShield1 = new G4LogicalVolume(basePbShield,ShieldPbMatter,"PbShield1",0,0,0);//base Pb
@@ -287,10 +297,7 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     physiPbShield10 = new G4PVPlacement(G4Transform3D(rpb2,tpb10),logicPbShield10,"PbShield10",logicWorld,false,0);//right wall top Pb
 
 
-
-
-
-	// Cu shield
+	// ##################### Cu shield
 	G4Box* baseCuShield = new G4Box("baseCuShield", fShieldCuDim1/2., fShieldCuDim1/2., fShieldCuDim4/2.);
 	G4Box* wallCuShield = new G4Box("wall1CuShield", fShieldCuDim2/2., fShieldCuDim4/2., fShieldCuDim3/2.);
     G4Box* doorCuShield = new G4Box("doorCuShield", fShieldCuDim2/2., fShieldCuDim2/2., fShieldCuDim4/2.);
@@ -311,7 +318,7 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	//G4ThreeVector tcu2 = G4ThreeVector(0.,0.,(fWorldLength/2.-fShieldPbDim4-fShieldCuDim4/2.));
     G4ThreeVector tcu2 = G4ThreeVector(0.,0.,(fDistanceEndcapCeiling+fShieldCuDim4/2.));
 	logicCuShield2 = new G4LogicalVolume(doorCuShield,ShieldCuMatter,"CuShield2",0,0,0);//top Cu
-	physiCuShield2 = new G4PVPlacement(G4Transform3D(rcu1,tcu2),logicCuShield2,"CuShield2",logicWorld,false,0);//top Cu
+	//NCM remove CuShield2 (TAPA) from the world, to check 60Co ----> physiCuShield2 = new G4PVPlacement(G4Transform3D(rcu1,tcu2),logicCuShield2,"CuShield2",logicWorld,false,0);//top Cu
 
 
 	//G4ThreeVector tcu3 = G4ThreeVector(fShieldCuDim4/2.,(-fWorldDiameter/2.+fShieldPbDim4+fShieldCuDim4/2.),0.);
@@ -324,7 +331,6 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     G4ThreeVector tcu4 = G4ThreeVector(-fShieldCuDim4/2.,(fWorldDiameter/2.-fShieldPbDim4-fShieldCuDim4/2.),(-fDistanceEndcapFloor+fShieldCuDim3/2.));
 	logicCuShield4 = new G4LogicalVolume(wallCuShield,ShieldCuMatter,"CuShield4",0,0,0);//back wall Cu
 	physiCuShield4 = new G4PVPlacement(G4Transform3D(rcu1,tcu4),logicCuShield4,"CuShield4",logicWorld,false,0);//back wall Cu
-
 
 
 	phiX=0.*deg;
@@ -345,7 +351,7 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	physiCuShield6 = new G4PVPlacement(G4Transform3D(rcu2,tcu6),logicCuShield6,"CuShield6",logicWorld,false,0.);//right wall Cu
 
 
-	//VacCryo
+	// ##################### VacCryo
 	G4Tubs* solidVacCryo = new G4Tubs("solidVacCryo", 0., fVacCryoExternalDiameter/2., fVacCryoLength/2., 0, twopi);
 	phiX=0.*deg;
 	phiY=0.*deg;
@@ -358,8 +364,7 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	logicVacCryo = new G4LogicalVolume(solidVacCryo, VacCryoMatter, "VacCryo", 0, 0, 0);
 	physiVacCryo = new G4PVPlacement(G4Transform3D(rvc,tvc), logicVacCryo, "VacCryo", logicWorld, false, 0);
 
-//---------------------------------------------------------------------------------------------------------
-	//Cap
+	// ##################### Cap
 	G4double fCapWidth2 = (fCapExternalDiameter-fCapInternalDiameter)/2.-fCapWindowWidth;
 	G4Tubs* solidCap1 = new G4Tubs("solidCap1", 0, fCapInternalDiameter/2., fCapWindowWidth/2., 0, twopi);//window part of cap -- upper part
 	G4Tubs* solidCap2 = new G4Tubs("solidCap2", fCapWindowDiameter/2., fCapInternalDiameter/2., fCapWidth2/2., 0, twopi);//window part of cap -- hole part
@@ -381,9 +386,8 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     logicCap3 = new G4LogicalVolume(solidCap3, CapMatter, "Cap3", 0, 0, 0);
 	physiCap3 = new G4PVPlacement(G4Transform3D(rcap,tcap3), logicCap3, "Cap3", logicVacCryo, false, 0);
 
-//----------------------------------------------------------------------------------------------------------
 
-	//Detector
+	// ##################### Detector
 	G4double phiStart;
 	phiStart = 0.;
 	G4double phiTotal;
@@ -391,27 +395,30 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	//G4double adjustRadius = 1.0*mm;
 
 
-	//----------
-	//Denote principal axes with 0 (0 angle with vertical), 1 (90/4 angle with vertical), 2 (90/2 angle with vertical), 3 (3*90/4 angle with vetical)
-	//and 4 (90 angle with vertical)
-	//Denote v, 2v, 3v the intersection of DL with axes
+	//
+	// Denote principal axes with
+    //          0 (0 angle with vertical),
+    //          1 (90/4 angle with vertical),
+    //          2 (90/2 angle with vertical),
+    //          3 (3*90/4 angle with vetical)
+	// and 4 (90 angle with vertical)
+	// Denote v, 2v, 3v the intersection of DL with axes
+    //
 	G4double z0,z1,z1v,z2,z2v,z3,z3v,z4;
 	G4double h0,h1,h1v,h2,h2v,h3,h3v,h4,h5,h6,h7,hv,hvv;
 	G4double rDZE0,rDZI1,rDZE1,rDZI1v,rDZE1v,rDZI2,rDZE2,rDZI2v,rDZE2v,rDZI3,rDZE3,rDZI3v,rDZE3v,rDZI4,rDZE4,rDZIv,rDZEv;
 	G4double rDI,rDIv,rDEv;
 
-	//z0, angle with vertical 0
+	// z0, angle with vertical 0
 	z0=0.;//=RDZI1
 	h0=fDetectorLength/2.;
 	rDZE0=fDetectorDiameter/2.-fDetectorBulletRadius;
-
 
 	//z1, angle with vertical 90/4, sin(90/4)=0.383, cos(90/4)=0.924
 	z1=fDetectorBulletRadius*(1.-0.924);
 	h1=h0-z1;
 	rDZI1=rDZE0+TMath::Sqrt((fDetectorBulletRadius-fDetectorDeadLayer)*(fDetectorBulletRadius-fDetectorDeadLayer)-(fDetectorBulletRadius-z1)*(fDetectorBulletRadius-z1));
     rDZE1=rDZE0+TMath::Sqrt(fDetectorBulletRadius*fDetectorBulletRadius-(fDetectorBulletRadius-z1)*(fDetectorBulletRadius-z1));
-
 
 	//z1v the position where the line with angle with vertical 90/4, sin(90/4)=0.383, cos(90/4)=0.924
     //touches internal part DL
@@ -450,13 +457,11 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	rDZI3v=rDZE0+TMath::Sqrt((fDetectorBulletRadius-fDetectorDeadLayer)*(fDetectorBulletRadius-fDetectorDeadLayer)-(fDetectorBulletRadius-z3v)*(fDetectorBulletRadius-z3v));
 	rDZE3v=rDZE0+TMath::Sqrt(fDetectorBulletRadius*fDetectorBulletRadius-(fDetectorBulletRadius-z3v)*(fDetectorBulletRadius-z3v));
 
-
 	//z4, angle with vertical 90
 	z4=fDetectorBulletRadius;
 	h4=h0-z4;
 	rDZI4=fDetectorDiameter/2.-fDetectorDeadLayer;
 	rDZE4=fDetectorDiameter/2.;
-
 
 	//z5, position where detector hole starts
 	h5=-h0+fDetectorHoleLength;
@@ -465,10 +470,8 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	h6=h5-fDetectorHoleBulletRadius;
 	rDI=fDetectorHoleDiameter/2.;
 
-
     //z7, position where crystal finishes
     h7=-h0;
-
 
     //Order 1 new: v<z1 normal order
     //Order 2 new: v=z1 normal order
@@ -480,8 +483,8 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     //order 8 new: v=v4
     //Order 9 new: v>v4, v<22. mm
 
-
-    if (fDetectorDeadLayer>0. && fDetectorDeadLayer<z1){
+    if (fDetectorDeadLayer>0. && fDetectorDeadLayer<z1)
+    {
         G4int numZPlanesDZ = 13;
         G4int numZPlanesD = 11;
         hv=h0-fDetectorDeadLayer;
@@ -502,11 +505,9 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 		solidDetDZ = new G4Polycone("solidDetDZ",phiStart,phiTotal,numZPlanesDZ,zPlaneDZ,rInnerDZ,rOuterDZ);
         solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
         G4cout<<"Order1!"<<G4endl;
-
-
     }
-
-    else if (fDetectorDeadLayer==z1){
+    else if (fDetectorDeadLayer==z1)
+    {
         G4int numZPlanesDZ = 12;
         G4int numZPlanesD = 10;
 		hv=h0-fDetectorDeadLayer;
@@ -528,17 +529,16 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
         solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
         G4cout<<"Order2!"<<G4endl;
     }
-
-
-
-	else if (fDetectorDeadLayer>z1 && fDetectorDeadLayer<z2){
+	else if (fDetectorDeadLayer>z1 && fDetectorDeadLayer<z2)
+    {
 		hv=h0-fDetectorDeadLayer;
 		hvv=hv+0.000000001*mm;
         rDZIv=rDZE0;
         rDZEv=rDZE0+TMath::Sqrt(fDetectorBulletRadius*fDetectorBulletRadius-(fDetectorBulletRadius-fDetectorDeadLayer)*(fDetectorBulletRadius-fDetectorDeadLayer));
         rDIv=z0;
         rDEv=rDZIv;
-        if (z1v<z2){
+        if (z1v<z2)
+        {
 			G4int numZPlanesDZ = 13;
 			G4int numZPlanesD = 10;
 			const G4double zPlaneDZ[] = {h0,h1,hvv,hv,h1v,h2,h2v,h3,h3v,h4,h5,h6,h7};
@@ -551,10 +551,10 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 			solidDetDZ = new G4Polycone("solidDetDZ",phiStart,phiTotal,numZPlanesDZ,zPlaneDZ,rInnerDZ,rOuterDZ);
 			solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
 		}
-		else if (z1v>z2){
+		else if (z1v>z2)
+        {
 			G4int numZPlanesDZ = 13;
 			G4int numZPlanesD = 10;
-
 			const G4double zPlaneDZ[] = {h0,h1,hvv,hv,h2,h1v,h2v,h3,h3v,h4,h5,h6,h7};
 			const G4double rInnerDZ[] = {z0,z0,z0,rDZIv,rDZI2,rDZI1v,rDZI2v,rDZI3,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
 			const G4double rOuterDZ[] = {rDZE0,rDZE1,rDZEv,rDZEv,rDZE2,rDZE1v,rDZE2v,rDZE3,rDZE3v,rDZE4,rDZE4,rDZE4,rDZE4};
@@ -565,7 +565,8 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 			solidDetDZ = new G4Polycone("solidDetDZ",phiStart,phiTotal,numZPlanesDZ,zPlaneDZ,rInnerDZ,rOuterDZ);
 			solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
 		}
-		else if (z1v==z2){
+		else if (z1v==z2)
+        {
 			G4int numZPlanesDZ = 12;
 			G4int numZPlanesD = 9;
 
@@ -581,114 +582,124 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 		}
         G4cout<<"Order3!"<<G4endl;
     }
+    else if (fDetectorDeadLayer==z2)
+    {
 
+		hv=h0-fDetectorDeadLayer;
+		hvv=hv+0.000000001*mm;
+		rDZIv=rDZE0;
+		rDZEv=rDZE0+TMath::Sqrt(fDetectorBulletRadius*fDetectorBulletRadius-(fDetectorBulletRadius-fDetectorDeadLayer)*(fDetectorBulletRadius-fDetectorDeadLayer));
+		rDIv=z0;
+		rDEv=rDZIv;
+		G4int numZPlanesDZ = 12;
+		G4int numZPlanesD = 9;
 
-       else if (fDetectorDeadLayer==z2){
-			hv=h0-fDetectorDeadLayer;
-			hvv=hv+0.000000001*mm;
-			rDZIv=rDZE0;
-			rDZEv=rDZE0+TMath::Sqrt(fDetectorBulletRadius*fDetectorBulletRadius-(fDetectorBulletRadius-fDetectorDeadLayer)*(fDetectorBulletRadius-fDetectorDeadLayer));
-			rDIv=z0;
-			rDEv=rDZIv;
-			G4int numZPlanesDZ = 12;
+		const G4double zPlaneDZ[] = {h0,h1,hvv,hv,h1v,h2v,h3,h3v,h4,h5,h6,h7};
+		const G4double rInnerDZ[] = {z0,z0,z0,rDZIv,rDZI1v,rDZI2v,rDZI3,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
+		const G4double rOuterDZ[] = {rDZE0,rDZE1,rDZEv,rDZEv,rDZE1v,rDZE2v,rDZE3,rDZE3v,rDZE4,rDZE4,rDZE4,rDZE4};
+
+		const G4double zPlaneD[] = {hv,h1v,h2v,h3,h3v,h4,h5,h6,h7};
+		const G4double rInnerD[] = {rDIv,z0,z0,z0,z0,z0,z0,rDI,rDI};
+		const G4double rOuterD[] = {rDEv,rDZI1v,rDZI2v,rDZI3,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
+		solidDetDZ = new G4Polycone("solidDetDZ",phiStart,phiTotal,numZPlanesDZ,zPlaneDZ,rInnerDZ,rOuterDZ);
+		solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
+		G4cout<<"Order4!"<<G4endl;
+    }
+    else if (fDetectorDeadLayer>z2 && fDetectorDeadLayer<z3)
+    {
+        hv=h0-fDetectorDeadLayer;
+	    hvv=hv+0.000000001*mm;
+    	rDZIv=rDZE0;
+	    rDZEv=rDZE0+TMath::Sqrt(fDetectorBulletRadius*fDetectorBulletRadius-(fDetectorBulletRadius-fDetectorDeadLayer)*(fDetectorBulletRadius-fDetectorDeadLayer));
+    	rDIv=z0;
+	    rDEv=rDZIv;
+    	if (z1v<z3 && z2v<z3)
+        {
+            G4int numZPlanesDZ = 13;
+    		G4int numZPlanesD = 9;
+
+	    	const G4double zPlaneDZ[] = {h0,h1,h2,hvv,hv,h1v,h2v,h3,h3v,h4,h5,h6,h7};
+		    const G4double rInnerDZ[] = {z0,z0,z0,z0,rDZIv,rDZI1v,rDZI2v,rDZI3,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
+    		const G4double rOuterDZ[] = {rDZE0,rDZE1,rDZE2,rDZEv,rDZEv,rDZE1v,rDZE2v,rDZE3,rDZE3v,rDZE4,rDZE4,rDZE4,rDZE4};
+
+	    	const G4double zPlaneD[] = {hv,h1v,h2v,h3,h3v,h4,h5,h6,h7};
+		    const G4double rInnerD[] = {rDIv,z0,z0,z0,z0,z0,z0,rDI,rDI};
+    		const G4double rOuterD[] = {rDEv,rDZI1v,rDZI2v,rDZI3,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
+
+	    	solidDetDZ = new G4Polycone("solidDetDZ",phiStart,phiTotal,numZPlanesDZ,zPlaneDZ,rInnerDZ,rOuterDZ);
+		    solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
+        }
+        else if (z1v<z3 && z2v==z3)
+        {
+            G4int numZPlanesDZ = 12;
+    		G4int numZPlanesD = 8;
+
+	    	const G4double zPlaneDZ[] = {h0,h1,h2,hvv,hv,h1v,h3,h3v,h4,h5,h6,h7};
+		    const G4double rInnerDZ[] = {z0,z0,z0,z0,rDZIv,rDZI1v,rDZI3,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
+    		const G4double rOuterDZ[] = {rDZE0,rDZE1,rDZE2,rDZEv,rDZEv,rDZE1v,rDZE3,rDZE3v,rDZE4,rDZE4,rDZE4,rDZE4};
+
+	    	const G4double zPlaneD[] = {hv,h1v,h3,h3v,h4,h5,h6,h7};
+		    const G4double rInnerD[] = {rDIv,z0,z0,z0,z0,z0,rDI,rDI};
+    		const G4double rOuterD[] = {rDEv,rDZI1v,rDZI3,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
+
+		    solidDetDZ = new G4Polycone("solidDetDZ",phiStart,phiTotal,numZPlanesDZ,zPlaneDZ,rInnerDZ,rOuterDZ);
+	    	solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
+        }
+        else if (z1v<z3 && z2v>z3)
+        {
+		    G4int numZPlanesDZ = 13;
+    		G4int numZPlanesD = 9;
+
+	    	const G4double zPlaneDZ[] = {h0,h1,h2,hvv,hv,h1v,h3,h2v,h3v,h4,h5,h6,h7};
+		    const G4double rInnerDZ[] = {z0,z0,z0,z0,rDZIv,rDZI1v,rDZI3,rDZI2v,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
+    		const G4double rOuterDZ[] = {rDZE0,rDZE1,rDZE2,rDZEv,rDZEv,rDZE1v,rDZE3,rDZE2v,rDZE3v,rDZE4,rDZE4,rDZE4,rDZE4};
+
+	    	const G4double zPlaneD[] = {hv,h1v,h3,h2v,h3v,h4,h5,h6,h7};
+		    const G4double rInnerD[] = {rDIv,z0,z0,z0,z0,z0,z0,rDI,rDI};
+    		const G4double rOuterD[] = {rDEv,rDZI1v,rDZI3,rDZI2v,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
+
+            solidDetDZ = new G4Polycone("solidDetDZ",phiStart,phiTotal,numZPlanesDZ,zPlaneDZ,rInnerDZ,rOuterDZ);
+		    solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
+    	}
+        else if (z1v==z3 && z2v>z3)
+        {
+            G4int numZPlanesDZ = 12;
+			G4int numZPlanesD = 8;
+
+			const G4double zPlaneDZ[] = {h0,h1,h2,hvv,hv,h3,h2v,h3v,h4,h5,h6,h7};
+			const G4double rInnerDZ[] = {z0,z0,z0,z0,rDZIv,rDZI3,rDZI2v,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
+			const G4double rOuterDZ[] = {rDZE0,rDZE1,rDZE2,rDZEv,rDZEv,rDZE3,rDZE2v,rDZE3v,rDZE4,rDZE4,rDZE4,rDZE4};
+
+			const G4double zPlaneD[] = {hv,h3,h2v,h3v,h4,h5,h6,h7};
+			const G4double rInnerD[] = {rDIv,z0,z0,z0,z0,z0,rDI,rDI};
+			const G4double rOuterD[] = {rDEv,rDZI3,rDZI2v,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
+
+            solidDetDZ = new G4Polycone("solidDetDZ",phiStart,phiTotal,numZPlanesDZ,zPlaneDZ,rInnerDZ,rOuterDZ);
+			solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
+
+        }
+		else if (z1v>z3 && z2v>z3)
+        {
+            G4int numZPlanesDZ = 13;
 			G4int numZPlanesD = 9;
 
-			const G4double zPlaneDZ[] = {h0,h1,hvv,hv,h1v,h2v,h3,h3v,h4,h5,h6,h7};
-			const G4double rInnerDZ[] = {z0,z0,z0,rDZIv,rDZI1v,rDZI2v,rDZI3,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
-			const G4double rOuterDZ[] = {rDZE0,rDZE1,rDZEv,rDZEv,rDZE1v,rDZE2v,rDZE3,rDZE3v,rDZE4,rDZE4,rDZE4,rDZE4};
+			const G4double zPlaneDZ[] = {h0,h1,h2,hvv,hv,h3,h1v,h2v,h3v,h4,h5,h6,h7};
+			const G4double rInnerDZ[] = {z0,z0,z0,z0,rDZIv,rDZI3,rDZI1v,rDZI2v,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
+			const G4double rOuterDZ[] = {rDZE0,rDZE1,rDZE2,rDZEv,rDZEv,rDZE3,rDZE1v,rDZE2v,rDZE3v,rDZE4,rDZE4,rDZE4,rDZE4};
 
-			const G4double zPlaneD[] = {hv,h1v,h2v,h3,h3v,h4,h5,h6,h7};
+			const G4double zPlaneD[] = {hv,h3,h1v,h2v,h3v,h4,h5,h6,h7};
 			const G4double rInnerD[] = {rDIv,z0,z0,z0,z0,z0,z0,rDI,rDI};
-			const G4double rOuterD[] = {rDEv,rDZI1v,rDZI2v,rDZI3,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
-			solidDetDZ = new G4Polycone("solidDetDZ",phiStart,phiTotal,numZPlanesDZ,zPlaneDZ,rInnerDZ,rOuterDZ);
+			const G4double rOuterD[] = {rDEv,rDZI3,rDZI1v,rDZI2v,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
+
+            solidDetDZ = new G4Polycone("solidDetDZ",phiStart,phiTotal,numZPlanesDZ,zPlaneDZ,rInnerDZ,rOuterDZ);
 			solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
-			G4cout<<"Order4!"<<G4endl;
-	   }
 
-       else if (fDetectorDeadLayer>z2 && fDetectorDeadLayer<z3){
-			hv=h0-fDetectorDeadLayer;
-			hvv=hv+0.000000001*mm;
-			rDZIv=rDZE0;
-			rDZEv=rDZE0+TMath::Sqrt(fDetectorBulletRadius*fDetectorBulletRadius-(fDetectorBulletRadius-fDetectorDeadLayer)*(fDetectorBulletRadius-fDetectorDeadLayer));
-			rDIv=z0;
-			rDEv=rDZIv;
-			if (z1v<z3 && z2v<z3){
-				G4int numZPlanesDZ = 13;
-				G4int numZPlanesD = 9;
-
-				const G4double zPlaneDZ[] = {h0,h1,h2,hvv,hv,h1v,h2v,h3,h3v,h4,h5,h6,h7};
-				const G4double rInnerDZ[] = {z0,z0,z0,z0,rDZIv,rDZI1v,rDZI2v,rDZI3,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
-				const G4double rOuterDZ[] = {rDZE0,rDZE1,rDZE2,rDZEv,rDZEv,rDZE1v,rDZE2v,rDZE3,rDZE3v,rDZE4,rDZE4,rDZE4,rDZE4};
-
-				const G4double zPlaneD[] = {hv,h1v,h2v,h3,h3v,h4,h5,h6,h7};
-				const G4double rInnerD[] = {rDIv,z0,z0,z0,z0,z0,z0,rDI,rDI};
-				const G4double rOuterD[] = {rDEv,rDZI1v,rDZI2v,rDZI3,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
-				solidDetDZ = new G4Polycone("solidDetDZ",phiStart,phiTotal,numZPlanesDZ,zPlaneDZ,rInnerDZ,rOuterDZ);
-				solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
-			}
-			else if (z1v<z3 && z2v==z3){
-				G4int numZPlanesDZ = 12;
-				G4int numZPlanesD = 8;
-
-				const G4double zPlaneDZ[] = {h0,h1,h2,hvv,hv,h1v,h3,h3v,h4,h5,h6,h7};
-				const G4double rInnerDZ[] = {z0,z0,z0,z0,rDZIv,rDZI1v,rDZI3,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
-				const G4double rOuterDZ[] = {rDZE0,rDZE1,rDZE2,rDZEv,rDZEv,rDZE1v,rDZE3,rDZE3v,rDZE4,rDZE4,rDZE4,rDZE4};
-
-				const G4double zPlaneD[] = {hv,h1v,h3,h3v,h4,h5,h6,h7};
-				const G4double rInnerD[] = {rDIv,z0,z0,z0,z0,z0,rDI,rDI};
-				const G4double rOuterD[] = {rDEv,rDZI1v,rDZI3,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
-				solidDetDZ = new G4Polycone("solidDetDZ",phiStart,phiTotal,numZPlanesDZ,zPlaneDZ,rInnerDZ,rOuterDZ);
-				solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
-			}
-			else if (z1v<z3 && z2v>z3){
-				G4int numZPlanesDZ = 13;
-				G4int numZPlanesD = 9;
-
-				const G4double zPlaneDZ[] = {h0,h1,h2,hvv,hv,h1v,h3,h2v,h3v,h4,h5,h6,h7};
-				const G4double rInnerDZ[] = {z0,z0,z0,z0,rDZIv,rDZI1v,rDZI3,rDZI2v,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
-				const G4double rOuterDZ[] = {rDZE0,rDZE1,rDZE2,rDZEv,rDZEv,rDZE1v,rDZE3,rDZE2v,rDZE3v,rDZE4,rDZE4,rDZE4,rDZE4};
-
-				const G4double zPlaneD[] = {hv,h1v,h3,h2v,h3v,h4,h5,h6,h7};
-				const G4double rInnerD[] = {rDIv,z0,z0,z0,z0,z0,z0,rDI,rDI};
-				const G4double rOuterD[] = {rDEv,rDZI1v,rDZI3,rDZI2v,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
-				solidDetDZ = new G4Polycone("solidDetDZ",phiStart,phiTotal,numZPlanesDZ,zPlaneDZ,rInnerDZ,rOuterDZ);
-				solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
-			}
-			else if (z1v==z3 && z2v>z3){
-				G4int numZPlanesDZ = 12;
-				G4int numZPlanesD = 8;
-
-				const G4double zPlaneDZ[] = {h0,h1,h2,hvv,hv,h3,h2v,h3v,h4,h5,h6,h7};
-				const G4double rInnerDZ[] = {z0,z0,z0,z0,rDZIv,rDZI3,rDZI2v,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
-				const G4double rOuterDZ[] = {rDZE0,rDZE1,rDZE2,rDZEv,rDZEv,rDZE3,rDZE2v,rDZE3v,rDZE4,rDZE4,rDZE4,rDZE4};
-
-				const G4double zPlaneD[] = {hv,h3,h2v,h3v,h4,h5,h6,h7};
-				const G4double rInnerD[] = {rDIv,z0,z0,z0,z0,z0,rDI,rDI};
-				const G4double rOuterD[] = {rDEv,rDZI3,rDZI2v,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
-				solidDetDZ = new G4Polycone("solidDetDZ",phiStart,phiTotal,numZPlanesDZ,zPlaneDZ,rInnerDZ,rOuterDZ);
-				solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
-			}
-			else if (z1v>z3 && z2v>z3){
-				G4int numZPlanesDZ = 13;
-				G4int numZPlanesD = 9;
-
-				const G4double zPlaneDZ[] = {h0,h1,h2,hvv,hv,h3,h1v,h2v,h3v,h4,h5,h6,h7};
-				const G4double rInnerDZ[] = {z0,z0,z0,z0,rDZIv,rDZI3,rDZI1v,rDZI2v,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
-				const G4double rOuterDZ[] = {rDZE0,rDZE1,rDZE2,rDZEv,rDZEv,rDZE3,rDZE1v,rDZE2v,rDZE3v,rDZE4,rDZE4,rDZE4,rDZE4};
-
-				const G4double zPlaneD[] = {hv,h3,h1v,h2v,h3v,h4,h5,h6,h7};
-				const G4double rInnerD[] = {rDIv,z0,z0,z0,z0,z0,z0,rDI,rDI};
-				const G4double rOuterD[] = {rDEv,rDZI3,rDZI1v,rDZI2v,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
-				solidDetDZ = new G4Polycone("solidDetDZ",phiStart,phiTotal,numZPlanesDZ,zPlaneDZ,rInnerDZ,rOuterDZ);
-				solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
-			}
-
+        }
         G4cout<<"Order5!"<<G4endl;
     }
-
-
-    else if (fDetectorDeadLayer==z3){
-		G4int numZPlanesDZ = 12;
+    else if (fDetectorDeadLayer==z3)
+    {
+        G4int numZPlanesDZ = 12;
 		G4int numZPlanesD = 8;
 		hv=h0-fDetectorDeadLayer;
 		hvv=hv+0.000000001*mm;
@@ -696,6 +707,7 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
         rDZEv=rDZE0+TMath::Sqrt(fDetectorBulletRadius*fDetectorBulletRadius-(fDetectorBulletRadius-fDetectorDeadLayer)*(fDetectorBulletRadius-fDetectorDeadLayer));
         rDIv=z0;
         rDEv=rDZIv;
+
    		const G4double zPlaneDZ[] = {h0,h1,h2,hvv,hv,h1v,h2v,h3v,h4,h5,h6,h7};
    		const G4double rInnerDZ[] = {z0,z0,z0,z0,rDZIv,rDZI1v,rDZI2v,rDZI3v,rDZI4,rDZI4,rDZI4,rDZI4};
 		const G4double rOuterDZ[] = {rDZE0,rDZE1,rDZE2,rDZEv,rDZEv,rDZE1v,rDZE2v,rDZE3v,rDZE4,rDZE4,rDZE4,rDZE4};
@@ -708,8 +720,8 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
         solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
         G4cout<<"Order6!"<<G4endl;
     }
-
-    else if (fDetectorDeadLayer>z3 && fDetectorDeadLayer<z4){
+    else if (fDetectorDeadLayer>z3 && fDetectorDeadLayer<z4)
+    {
         G4int numZPlanesDZ = 13;
         G4int numZPlanesD = 8;
 		hv=h0-fDetectorDeadLayer;
@@ -730,11 +742,9 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 		solidDetDZ = new G4Polycone("solidDetDZ",phiStart,phiTotal,numZPlanesDZ,zPlaneDZ,rInnerDZ,rOuterDZ);
         solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
         G4cout<<"Order7!"<<G4endl;
-
-
     }
-
-     else if (fDetectorDeadLayer==z4){
+     else if (fDetectorDeadLayer==z4)
+     {
         G4int numZPlanesDZ = 9;
         G4int numZPlanesD = 4;
         hv=h0-fDetectorDeadLayer;
@@ -743,6 +753,7 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
         rDZEv=rDZE0+TMath::Sqrt(fDetectorBulletRadius*fDetectorBulletRadius-(fDetectorBulletRadius-fDetectorDeadLayer)*(fDetectorBulletRadius-fDetectorDeadLayer));
         rDIv=z0;
         rDEv=rDZIv;
+
 		const G4double zPlaneDZ[] = {h0,h1,h2,h3,hvv,hv,h5,h6,h7};
 		const G4double rInnerDZ[] = {z0,z0,z0,z0,z0,rDZI4,rDZI4,rDZI4,rDZI4};
 		const G4double rOuterDZ[] = {rDZE0,rDZE1,rDZE2,rDZE3,rDZE4,rDZE4,rDZE4,rDZE4,rDZE4};
@@ -755,8 +766,8 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
         solidDet = new G4Polycone("solidDet",phiStart,phiTotal,numZPlanesD,zPlaneD,rInnerD,rOuterD);
         G4cout<<"Order9!"<<G4endl;
     }
-
-    else if (fDetectorDeadLayer>z4){
+    else if (fDetectorDeadLayer>z4)
+    {
         G4int numZPlanesDZ = 10;
         G4int numZPlanesD = 4;
         hv=h0-fDetectorDeadLayer;
@@ -779,8 +790,6 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
         G4cout<<"Order10!"<<G4endl;
     }
 
-
-
 	phiX=0.*deg;
     phiY=0.*deg;
     phiZ=0.*deg;
@@ -796,7 +805,7 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	physiDetector = new G4PVPlacement(G4Transform3D(rdet,tdetDZ), logicDetector, "Detector", logicVacCryo, false, 0);
 
 
-	//Detector holder
+	// #################### Detector holder
 	G4Tubs* solidHolderH = new G4Tubs("HolderH", fHolderInternalDiameter/2., fHolderExternalDiameter/2.,
 									  (fHolderLength-fHolderBottomWidth)/2., 0, twopi);
 	G4Tubs* solidHolderNH = new G4Tubs("HolderNH", 0, fHolderExternalDiameter/2., fHolderBottomWidth/2., 0, twopi);
@@ -818,6 +827,7 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	physiHolder2 = new G4PVPlacement(G4Transform3D(rhold,thold2), logicHolder2, "Holder2", logicVacCryo, false, 0);
 
 
+    // #################### Pb thin layer
 	//Pb thin layer around holder inner part (modified 22/11/2013)
 	//5 cylinder sectors: one 60x0.3x60 mm3, four 22x0.3x10 mm3
 	//the angle of the sector theta=2*L^2/R^2, L=lenght of sector, R=external detector radius
@@ -885,9 +895,7 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     physiLayerThinPb5 = new G4PVPlacement(G4Transform3D(rpbl5,tpbl5), logicLayerThinPb5, "LayerThinPb5", logicVacCryo, false, 0);
 
 
-
-
-	//Pb layer
+	// #################### Pb layer
 	G4Tubs* solidLayerPb = new G4Tubs("solidPbLayer", fLayerPbInternalDiameter/2., fLayerPbExternalDiameter/2.,
 									  fLayerPbLength/2., 0, twopi);
 	phiX=0.*deg;
@@ -902,9 +910,7 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	physiLayerPb = new G4PVPlacement(G4Transform3D(rpbl,tpbl), logicLayerPb, "LayerPb", logicHolder1, false, 0);
 
 
-
-
-//Target (sample)
+    // #################### Target (sample)
     G4Box* solidTar1 = new G4Box("solidTar1", fL1/2., fL2/2., fL3/2.);
 	phiX=0.*deg;
 	phiY=0.*deg;
@@ -915,43 +921,44 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rm1.rotateZ(phiZ);
 	G4ThreeVector tar1 = G4ThreeVector(0.,0.,fL3/2.+9.9*mm);//!!!!check the distance sample-endcap and propagate it to all .mac files
 	logicTarget1 = new G4LogicalVolume(solidTar1,TarMatter,"Target1",0,0,0);
-	physiTarget1 = new G4PVPlacement(G4Transform3D(rm1,tar1),logicTarget1,"Target1",logicWorld,false,0);
+	// NCM remove target from the world, to check 60Co --> physiTarget1 = new G4PVPlacement(G4Transform3D(rm1,tar1),logicTarget1,"Target1",logicWorld,false,0);
 
 
 
-	  //------------------------------------------------
-  // Sensitive detectors
-  //------------------------------------------------
-
-  //  G4SDManager* SDman = G4SDManager::GetSDMpointer();
-
-	// G4String detectortargetSDname = "exrdm/DetectorTargetSD";
+    //------------------------------------------------
+    // Sensitive detectors
+    //------------------------------------------------
+    //
+    //  G4SDManager* SDman = G4SDManager::GetSDMpointer();
+    //
+    // G4String detectortargetSDname = "exrdm/DetectorTargetSD";
 	// exrdmDetectorSD* aDetectorSD = new exrdmDetectorSD( detectorTargetSDname );
 	// SDman->AddNewDetector( aDetectorSD );
-	//logicTarget->SetSensitiveDetector( aDetectorSD );
+	// logicTarget->SetSensitiveDetector( aDetectorSD );
 	// logicDetector->SetSensitiveDetector( aDetectorSD );
 	//
 	//-------------------------------------------------
 	// regions
 	//
-	//  if(targetRegion) delete targetRegion;
+	// if(targetRegion) delete targetRegion;
 	// if(detectorRegion) delete detectorRegion;
-	//if(targetRegion) delete targetRegion;
+	// if(targetRegion) delete targetRegion;
 	targetRegion1 = new G4Region("Target1");
 	targetRegion1->AddRootLogicalVolume(logicTarget1);
-
 
     //if(detectorRegion) delete detectorRegion;
 	detectorRegion   = new G4Region("Detector");
 	detectorRegion->AddRootLogicalVolume(logicDetector);
 	detectorDeadLayerRegion = new G4Region("DetectorDeadLayer");
 	detectorDeadLayerRegion->AddRootLogicalVolume(logicDetectorDeadLayer);
+
 	//if(capRegion) delete capRegion;
 	capRegion = new G4Region("Cap");
 	capRegion->AddRootLogicalVolume(logicCap1);
 	capRegion->AddRootLogicalVolume(logicCap2);
 	capRegion->AddRootLogicalVolume(logicCap3);
-	//if(shieldPbRegion) delete shieldPbRegion;
+
+    //if(shieldPbRegion) delete shieldPbRegion;
 	shieldPbRegion = new G4Region("ShieldPb");
 	shieldPbRegion->AddRootLogicalVolume(logicPbShield1);
 	shieldPbRegion->AddRootLogicalVolume(logicPbShield2);
@@ -968,13 +975,16 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	shieldCuRegion->AddRootLogicalVolume(logicCuShield4);
 	shieldCuRegion->AddRootLogicalVolume(logicCuShield5);
 	shieldCuRegion->AddRootLogicalVolume(logicCuShield6);
-	//supportRegion = new G4Region("Support");
+
+    //supportRegion = new G4Region("Support");
 	//supportRegion->AddRootLogicalVolume(logicSupport);
-	//if(holderRegion) delete holderRegion;
+
+    //if(holderRegion) delete holderRegion;
 	holderRegion = new G4Region("Holder");
 	holderRegion->AddRootLogicalVolume(logicHolder1);
 	holderRegion->AddRootLogicalVolume(logicHolder2);
-	//if(layerPbRegion) delete layerPbRegion;
+
+    //if(layerPbRegion) delete layerPbRegion;
 	layerPbRegion = new G4Region("LayerPb");
 	layerPbRegion->AddRootLogicalVolume(logicLayerPb);
 	layerThinPbRegion = new G4Region("LayerThinPb");
@@ -985,11 +995,9 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	layerThinPbRegion->AddRootLogicalVolume(logicLayerThinPb5);
 
 
-
 	//--------- Visualization attributes -------------------------------
 	logicWorld->SetVisAttributes(G4VisAttributes::Invisible);
 	G4VisAttributes* TargetVisAtt= new G4VisAttributes(G4Colour(1.0,1.0,1.0));//white
-	//G4VisAttributes* TargetVisAtt= new G4VisAttributes(G4Colour(1.0,1.0,.0));//yellow
 	logicTarget1->SetVisAttributes(TargetVisAtt);
 	//logicTarget1->SetVisAttributes(G4VisAttributes::Invisible);
 	G4VisAttributes* DetectorVisAtt = new G4VisAttributes(G4Colour(1.0,0.,1.0));//magenta
@@ -1058,32 +1066,33 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	logicLayerThinPb5->SetVisAttributes(LeadVisAtt);
 	//logicLayerThinPb5->SetVisAttributes(G4VisAttributes::Invisible);
 
-  //------------ set the incident position ------
+    //------------ set the incident position ------
+    //
+    // get the pointer to the User Interface manager
+    //
+    // G4UImanager* UI = G4UImanager::GetUIpointer();
+    //    UI->ApplyCommand("/run/verbose 1");
+    //        UI->ApplyCommand("/event/verbose 2");
+    //        UI->ApplyCommand("/tracking/verbose 1");
 
- // get the pointer to the User Interface manager
-
-  //G4UImanager* UI = G4UImanager::GetUIpointer();
- //       UI->ApplyCommand("/run/verbose 1");
- //       UI->ApplyCommand("/event/verbose 2");
- //       UI->ApplyCommand("/tracking/verbose 1");
-
-        //G4double zpos = -fWorldLength/2.;
-    //    G4double zpos = 0.;
-      //  G4String command = "/gps/pos/centre ";
-        //std::ostringstream os;
-       // os << zpos ;
-        //G4String xs = os.str();
-        //UI->ApplyCommand(command+"0. 0. "+xs+" mm");
-        //UI->ApplyCommand("/gps/pos/type Point");
-	//UI->ApplyCommand("/gps/pos/shape Cylinder");
-        //command = "/gps/position ";
-  //UI->ApplyCommand(command+"0. 0. "+xs+" mm");
-        //UI->ApplyCommand("/gps/particle proton");
-        //UI->ApplyCommand("/gps/direction 0 0 1");
-        //UI->ApplyCommand("/gps/ion 100 MeV");
-  //UI->ApplyCommand("/gps/direction 0 0 1");
-  //UI->ApplyCommand("/gps/energy 100 MeV");
-  //
+    //G4double zpos = -fWorldLength/2.;
+    //  G4double zpos = 0.;
+    //  G4String command = "/gps/pos/centre ";
+    //  std::ostringstream os;
+    //  os << zpos ;
+    //  G4String xs = os.str();
+    //
+    // UI->ApplyCommand(command+"0. 0. "+xs+" mm");
+    // UI->ApplyCommand("/gps/pos/type Point");
+	// UI->ApplyCommand("/gps/pos/shape Cylinder");
+    // UI->ApplyCommand("/gps/position ");
+    // UI->ApplyCommand(command+"0. 0. "+xs+" mm");
+    // UI->ApplyCommand("/gps/particle proton");
+    // UI->ApplyCommand("/gps/direction 0 0 1");
+    // UI->ApplyCommand("/gps/ion 100 MeV");
+    // UI->ApplyCommand("/gps/direction 0 0 1");
+    // UI->ApplyCommand("/gps/energy 100 MeV");
+    //
 
   return physiWorld;
 }
