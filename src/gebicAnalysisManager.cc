@@ -132,66 +132,77 @@ void gebicAnalysisManager::BeginOfEvent()
 }
 
 
-
 void gebicAnalysisManager::EndOfEvent()
 {
-  if (fEdepo.size()) {
-    std::sort(fEdepo.begin(),fEdepo.end());
+    if (fEdepo.size())
+    {
+        std::sort(fEdepo.begin(),fEdepo.end());
 
-    G4double DetE = 0.;
-    G4double DetW = 0.;
-    G4double Time = fEdepo[0].GetTime();
-    G4int PART = fEdepo[0].GetPart();
-    if (PART == 0){
-    	DetE = fEdepo[0].GetEnergy();
-    	DetW = fEdepo[0].GetEnergy()*fEdepo[0].GetWeight();
-    	}
-    else{
-        DetE=0.;
-        DetW=0.;
+        G4double DetE = 0.;
+        G4double DetW = 0.;
+        G4double Time = fEdepo[0].GetTime();
+        G4int PART = fEdepo[0].GetPart();
+        if (PART == 0)
+        {
+        	DetE = fEdepo[0].GetEnergy();
+    	    DetW = fEdepo[0].GetEnergy()*fEdepo[0].GetWeight();
+        }
+        else
+        {
+            DetE=0.;
+            DetW=0.;
         }
 
-    for (size_t i = 1; i < fEdepo.size(); i++) {
-      PART = fEdepo[i].GetPart();
-      if (std::fabs((fEdepo[i].GetTime()- Time)/second) <= fPulseWidth) {
-			if ( PART == 0 ) {
-				DetE += fEdepo[i].GetEnergy();
-				DetW += fEdepo[i].GetEnergy()*fEdepo[i].GetWeight();
-			}
-			else {
-				DetE = 0.;
-				DetW = 0.;
-			}
-       }
-       else {
-			// tallying
-			if (DetE) {
-				DetW /= DetE;
-				fHisto->FillHisto(0,DetE,DetW); // Detector histogram
-	        }
+        for (size_t i = 1; i < fEdepo.size(); i++)
+        {
+            PART = fEdepo[i].GetPart();
+            if (std::fabs((fEdepo[i].GetTime()- Time)/second) <= fPulseWidth)
+            {
+                if ( PART == 0 )
+                {
+                    DetE += fEdepo[i].GetEnergy();
+                    DetW += fEdepo[i].GetEnergy()*fEdepo[i].GetWeight();
+                }
+                else
+                {
+                    DetE = 0.;
+                    DetW = 0.;
+                }
+            }
+            else
+            {
+                // tallying
+			    if (DetE)
+                {
+                    DetW /= DetE;
+		    		fHisto->FillHisto(0,DetE,DetW); // Detector histogram
+	            }
 
-			//reset
-			PART = fEdepo[i].GetPart();
-			Time = fEdepo[i].GetTime();
-			if (PART == 0){
-				DetE = fEdepo[i].GetEnergy();
-				DetW = fEdepo[i].GetEnergy()*fEdepo[i].GetWeight();
-			}
-			else{
-				DetE = 0.;
-				DetW = 0.;
-			}
-      }
+    			//reset
+	    		PART = fEdepo[i].GetPart();
+		    	Time = fEdepo[i].GetTime();
+			    if (PART == 0)
+                {
+                    DetE = fEdepo[i].GetEnergy();
+		    		DetW = fEdepo[i].GetEnergy()*fEdepo[i].GetWeight();
+			    }
+    			else
+                {
+		    		DetE = 0.;
+			    	DetW = 0.;
+			    }
+           }
+        }
+
+        //tally the last hit
+	    if (DetE)
+        {
+            DetW /= DetE;
+            fHisto->FillHisto(0,DetE,DetW); // Detector histogram
+        }
     }
-    //tally the last hit
-	if (DetE) {
-	        DetW /= DetE;
-	        fHisto->FillHisto(0,DetE,DetW); // Detector histogram
-	        }
-  }
-  //AddEnergy(0.,0.,0.,1);
+    //AddEnergy(0.,0.,0.,1);
 }
-
 
 
 void gebicAnalysisManager::AddEnergy(G4double edep, G4double weight, G4double time, G4int part)
