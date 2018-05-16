@@ -43,7 +43,7 @@ void gebicAnalysisManager::Dispose()
 //exchange here the maximum energy of the histo
 gebicAnalysisManager::gebicAnalysisManager()
 : fVerbose(0), fNEvt1(-1), fNEvt2(-2),
-  fHistEMax(2870.4*keV), fHistEMin(0.2), fHistNBin(8190), //fHistNBin(8192),
+  fHistEMax(2870.4*keV), fHistEMin(0.2), fHistNBin(8192),
   fTargetThresE(10.0*keV), fDetectorThresE(10.0*keV), fCapThresE(10.0*keV),
   fCuThresE(10.0*keV), fPbThresE(10.0*keV), fPulseWidth(1.*microsecond)
 {
@@ -65,8 +65,7 @@ void gebicAnalysisManager::BookHisto()
 {
   fHistEMax = 2870.4*keV;//exchange here maximum energy of the histo
   fHistEMin = 0.2*eV;
-  // fHistNBin = 8192;
-  fHistNBin = 8190;
+  fHistNBin = 8192;
 
   fHisto->Add1D("10","MC - GeLaTuca DAMIC Pb",fHistNBin,fHistEMin,fHistEMax,keV);//give histo title here
 }
