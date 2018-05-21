@@ -139,7 +139,6 @@ void gebicAnalysisManager::EndOfEvent()
 
         G4double DetE = 0.;
         G4double DetW = 0.;
-        //G4double Time = 0.;
 
         for(size_t i = 0; i < fEdepo.size();++i)
         {
