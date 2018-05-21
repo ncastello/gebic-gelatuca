@@ -5,3 +5,4 @@ mchistos/*
 build
 all_gammas.sh
 *.root
+*.swp
