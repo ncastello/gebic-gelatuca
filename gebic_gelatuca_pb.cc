@@ -10,6 +10,12 @@
 #include "G4UIterminal.hh"
 #include "G4UItcsh.hh"
 
+//XXX Provisional class: trying to bypass problem with stuck particles.
+//Transported particles infinitely  between VaccCry--LayerPb, probably because
+//some geometry detector bug (detector overlap layers, volums, ...) --> check
+//geometry
+#include "gebicSteppingAction.hh"
+//XXX
 #include "gebicDetectorConstruction.hh"
 #include "gebicPhysicsList.hh"
 #include "gebicEventAction.hh"
@@ -106,6 +112,12 @@ int main(int argc,char** argv)
     auto eventAction = new gebicEventAction;
     runManager->SetUserAction(eventAction);
     runManager->SetUserAction(new gebicRunAction(eventAction));
+    //XXX Provisional class: trying to bypass problem with stuck particles.
+    //Transported particles infinitely  between VaccCry--LayerPb, probably because
+    //some geometry detector bug (detector overlap layers, volums, ...) --> check
+    //geometry
+    runManager->SetUserAction(new gebicSteppingAction);
+    //XXX
 
     #ifdef G4VIS_USE
     // visualization manager
