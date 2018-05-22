@@ -10,6 +10,7 @@
 
 #include "gebicRunAction.hh"
 #include "gebicAnalysisManager.hh"
+#include "gebicEventAction.hh"
 
 #include "G4Run.hh"
 #include "G4UImanager.hh"
@@ -18,8 +19,33 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
 
-gebicRunAction::gebicRunAction()
+gebicRunAction::gebicRunAction( gebicEventAction * eventAction ) :
+    _eventAction(eventAction)
 {
+    // Creation of the analysis manager
+    auto analysisManager = G4AnalysisManager::Instance();
+    G4cout << "Using " << analysisManager->GetType() << G4endl;
+
+    // Default settings
+    // analysisManager->SetNtupleMerging(true);
+    // Note: merging ntuples is available only with Root output
+    analysisManager->SetVerboseLevel(1);
+    analysisManager->SetFileName("gebic");
+
+    if(this->_eventAction)
+    {
+        analysisManager->CreateNtuple("gebicMC","HPGe simulation at Canfrac");
+//      Probably not valid for Geant4.9
+//        analysisManager
+//            ->CreateNtupleDColumn("Edep", _eventAction->GetEdep());
+        // XXX TO BE REMOVED when migrating 4.10!!!!
+        const int ntuple_id = analysisManager->CreateNtupleFColumn("Edep");
+
+        _eventAction->set_ntuple_id(ntuple_id);
+        // --->> XXX TO BE REMOVED when migrating 4.10!!!!
+
+        analysisManager->FinishNtuple();
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
@@ -32,26 +58,15 @@ gebicRunAction::~gebicRunAction()
 
 void gebicRunAction::BeginOfRunAction(const G4Run* aRun)
 {
-    // Creation of the analysis manager
-    //gebicAnalysisManager* analysis = gebicAnalysisManager::GetInstance();
+    // Get analysis manager
     auto analysisManager = G4AnalysisManager::Instance();
-    G4cout << "Using " << analysisManager->GetType() << G4endl;
 
-    // Default settings
-    analysisManager->SetNtupleMerging(true);
-    // Note: merging ntuples is available only with Root output
-    analysisManager->SetVerboseLevel(1);
-    analysisManager->SetFileName("gebic");
-
-    if(this->fEventAction)
-    {
-        analysisManager
-            ->CreateNtupleDColumn("Edep", fEventAction->GetEdep());
-        analysisManager->FinishNtuple();
-    }
+    // Open an output file
+    // The default file name is set in B5RunAction::B5RunAction(),
+    // it can be overwritten in a macro
+    analysisManager->OpenFile();
 
     //analysis->BeginOfRun();
-
     G4int RunN = aRun->GetRunID();
     if ( RunN % 1000 == 0 )
     {
@@ -70,14 +85,16 @@ void gebicRunAction::BeginOfRunAction(const G4Run* aRun)
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
 
-void gebicRunAction::EndOfRunAction(const G4Run* aRun)
+void gebicRunAction::EndOfRunAction(const G4Run* /*aRun*/)
 {
-  // Get the analysis manager
-  gebicAnalysisManager* analysis = gebicAnalysisManager::GetInstance();
-  analysis->EndOfRun(aRun->GetNumberOfEvent());
+    // save histograms & ntuple
+    auto analysisManager = G4AnalysisManager::Instance();
+    analysisManager->Write();
+    analysisManager->CloseFile();
 
 #ifdef G4VIS_USE
   if (G4VVisManager::GetConcreteInstance())
     G4UImanager::GetUIpointer()->ApplyCommand("/vis/show/view");
 #endif
+
 }

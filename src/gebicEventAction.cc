@@ -8,9 +8,15 @@
  */
  //re-checked 25/11/2013
 
-#include "G4ios.hh"
 #include "gebicEventActionMessenger.hh"
 #include "gebicEventAction.hh"
+// using ROOT technology for the analysis (g4rrot.hh)
+#include "gebicAnalysisManager.hh"
+#include "gebicHit.hh"
+
+#include "G4ios.hh"
+#include "G4SDManager.hh"
+#include "G4RunManager.hh"
 #include "G4Event.hh"
 #include "G4EventManager.hh"
 #include "G4HCofThisEvent.hh"
@@ -19,33 +25,34 @@
 #include "G4VVisManager.hh"
 #include "G4UImanager.hh"
 #include "G4UnitsTable.hh"
-//#include "gebicAnalysisManager.hh"
 #include "G4SystemOfUnits.hh"
 
 extern G4bool drawEvent;
 
+static int __ne=0;
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
 
 gebicEventAction::gebicEventAction():
-    fDrawFlag("all"),
-    fEventMessenger(nullptr),
+    _drawFlag("all"),
+    _eventMessenger(nullptr),
     _hitCollection(new std::vector<float>),
     _hitCollectionID(-1),
-    _hitCollectionName("gebicHitCollection"),
+    _hitCollectionName("HPGe/gebicHitCollection"),
     _pulseWidth(1.*microsecond)
 {
-    fEventMessenger = new gebicEventActionMessenger(this);
-    G4RunManager::GetRunManager()->SetPrintProgress(10000);
+    _eventMessenger = new gebicEventActionMessenger(this);
+    // XXX TO BE UNCOMMENT with 4.10
+    //G4RunManager::GetRunManager()->SetPrintProgress(10000);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
 
 gebicEventAction::~gebicEventAction()
 {
-    if(fEventMessenger!=nullptr)
+    if(_eventMessenger!=nullptr)
     {
-        delete fEventMessenger;
-        _fEventMessenger=nullptr;
+        delete _eventMessenger;
+        _eventMessenger=nullptr;
     }
     if(_hitCollection!=nullptr)
     {
@@ -56,28 +63,36 @@ gebicEventAction::~gebicEventAction()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
 
-void gebicEventAction::BeginOfEventAction(const G4Event* /*evt*/)
+void gebicEventAction::BeginOfEventAction(const G4Event* evt)
+//void gebicEventAction::BeginOfEventAction(const G4Event* evt)
 {
     //gebicAnalysisManager::GetInstance()->BeginOfEvent();
     _hitCollectionID = G4SDManager::GetSDMpointer()->GetCollectionID(_hitCollectionName);
+
+    // XXX TO BE REMOVED with 4.10
+    //if(evt->GetEventID() % 10000 == 0)
+    //{
+        G4cout << "Processed event: "<< evt->GetEventID() << G4endl;
+    //}
+    // -->> XXX TO BE REMOVED with 4.10
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
 
 void gebicEventAction::EndOfEventAction(const G4Event* event)
 {
-    //analysis
-    //gebicAnalysisManager::GetInstance()->EndOfEvent();
-    //
+    // XXX TO BE REMOVED when migrating 4.10!!!!
     auto analysisManager = G4AnalysisManager::Instance();
+    // --> XXX TO BE REMOVED when migrating 4.10!!!!
 
     // HCE hit collections of the event
-    auto HCE = this->GetHC(event, _hitCollectionID);
+    auto HCE = event->GetHCofThisEvent();
     if(HCE==nullptr)
     {
         return;
     }
-    if(HCE->entries()==0)
+    auto HC = static_cast<G4THitsCollection<gebicHit>*>(HCE->GetHC(_hitCollectionID));
+    if(HC == nullptr || HC->entries()==0)
     {
         return;
     }
@@ -85,16 +100,17 @@ void gebicEventAction::EndOfEventAction(const G4Event* event)
     // Clean the hitCollection vector and guess the amount of memory to be
     // allocated
     _hitCollection->clear();
-    _hitCollection->reserve(HCE->entries());
+    _hitCollection->reserve(HC->entries());
 
     // Obtaining the std::vector of hits in order to be able to
     // use the sort algorithm
-    auto hits = HCE->GetVector();
+    auto hits = HC->GetVector();
     // sorting by time (XXX)
     std::sort(hits->begin(),hits->end(),
             [] (gebicHit *l, gebicHit *r) -> bool { return (*l < *r); } );
 
     // emulating readout electronic time (very, very simple)
+std::cout << " ABans " << __ne << std::endl;
     for(unsigned int i=0; i< hits->size(); ++i )
     {
         const G4double Time0 = (*hits)[i]->GetTime();
@@ -102,10 +118,10 @@ void gebicEventAction::EndOfEventAction(const G4Event* event)
 
         // Next element as long as exists
         auto k=i+1;
-        while(k<=hits->size() &&
+        while(k<hits->size() &&
                 std::fabs(((*hits)[k]->GetTime()- Time0)/second) <= _pulseWidth)
         {
-            Edep += (*hits)[k]->GetEnergy();
+            Edep += (*hits)[k]->GetEdep();
             ++k;
         }
 
@@ -113,10 +129,14 @@ void gebicEventAction::EndOfEventAction(const G4Event* event)
         if(fabs(Edep) > 1e-12)
         {
             _hitCollection->push_back(Edep);
+            // XXX TO BE REMOVED when migrating 4.10!!!!
+            analysisManager->FillNtupleFColumn(this->_ntupleID,Edep/keV);
+            ++__ne;
+            // --->XXX TO BE REMOVED when migrating 4.10!!!!
         }
-
         // Recovering index for next iteration
         i=k;
     }
-
+    analysisManager->AddNtupleRow();
+std::cout << " --> " << __ne << std::endl;
 }

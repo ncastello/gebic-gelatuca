@@ -23,7 +23,7 @@
 //----------------------------------------------------------------------------
 //
 
-#include "g4root.h"
+#include "g4root.hh"
 
 //#include "globals.hh"
 //#include "gebicEnergyDeposition.hh"

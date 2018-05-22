@@ -21,27 +21,33 @@ class gebicEventActionMessenger;
 
 class gebicEventAction : public G4UserEventAction
 {
-  public:
-    gebicEventAction();
-    virtual ~gebicEventAction();
+    public:
+        gebicEventAction();
+        virtual ~gebicEventAction();
 
-  public:
-    virtual void BeginOfEventAction(const G4Event* anEvent);
-    virtual void EndOfEventAction(const G4Event* anEvent);
+        // XXX TO BE REMOVED when migrating 4.10!!!!
+        inline void set_ntuple_id(const int & id) { _ntupleID = id; }
+        // --- XXX TO BE REMOVED when migrating 4.10!!!!
 
-    void SetDrawFlag(G4String val)  {fDrawFlag = val;};
+        virtual void BeginOfEventAction(const G4Event* anEvent);
+        virtual void EndOfEventAction(const G4Event* anEvent);
 
-    inline std::vector<float> * GetEdep() {return _hitCollection;};
+        void SetDrawFlag(G4String val)  {_drawFlag = val;};
+
+        inline std::vector<float> * GetEdep() { return _hitCollection; }
 
   private:
-    G4String fDrawFlag;                         // control the drawing of event
-    gebicEventActionMessenger*  fEventMessenger;
+        G4String _drawFlag;                         // control the drawing of event
+        gebicEventActionMessenger*  _eventMessenger;
 
-    std::vector<float> * _hitCollection;
-    G4int _hitCollectionID;
-    G4String _hitCollectionName;
+        std::vector<float> * _hitCollection;
+        G4int _hitCollectionID;
+        G4String _hitCollectionName;
 
-    G4double _pulseWidth;
+        G4double _pulseWidth;
+        // XXX TO BE REMOVED when migrating 4.10
+        int _ntupleID;
+
 };
 
 #endif

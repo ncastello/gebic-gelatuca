@@ -1,17 +1,21 @@
 #include "gebicSensitiveDetector.hh"
-#include "gebicHit.hh"
+
+#include "G4SDManager.hh"
 
 #include <algorithm>
 #include <cmath>
 
 gebicSensitiveDetector::gebicSensitiveDetector(G4String SDname) :
     G4VSensitiveDetector(SDname),
-    _hitsCollections(nullptr),
+    _hitsCollection(nullptr),
     _collectionID(-1)
 {
     this->collectionName.insert("gebicHitCollection");
 }
 
+gebicSensitiveDetector::~gebicSensitiveDetector()
+{
+}
 
 void gebicSensitiveDetector::Initialize(G4HCofThisEvent* HCE)
 {
@@ -21,7 +25,7 @@ void gebicSensitiveDetector::Initialize(G4HCofThisEvent* HCE)
     {
         _collectionID = G4SDManager::GetSDMpointer()->GetCollectionID(_hitsCollection);
     }
-    HCE->AddHitCollection(_collectionID,_hitsCollection);
+    HCE->AddHitsCollection(_collectionID,_hitsCollection);
 }
 
 G4bool gebicSensitiveDetector::ProcessHits(G4Step *step, G4TouchableHistory *)
@@ -42,44 +46,8 @@ G4bool gebicSensitiveDetector::ProcessHits(G4Step *step, G4TouchableHistory *)
     return true;
 }
 
-void gebicSensitiveDetector::EndOfEvent(G4HCofThisEvent* HCE)
+void gebicSensitiveDetector::EndOfEvent(G4HCofThisEvent* /*HCE*/)
 {
-    if(_hitsCollection->entries()==0)
-    {
-        return;
-    }
-
-    // Obtaining the std::vector of hits in order to be able to
-    // use the sort algorithm
-    auto hits = _hitsCollection->GetVector();
-    // sorting by time (XXX)
-    std::sort(hits->begin(),hits->end(),
-            [] (gebicHit *l, gebicHit *r) -> bool { return (*l < *r); } );
-
-    // emulating readout electronic time (very, very simple)
-    for(unsigned int i=0; i< hits->size(); ++i )
-    {
-        const G4double Time0 = (*hits)[i]->GetTime();
-        float DetE = (*hits)[i]->GetEdep();
-
-        // Next element as long as exists
-        auto k=i+1;
-        while(k<=hits->size() &&
-                std::fabs(((*hits)[k]->GetTime()- Time0)/second) <= fPulseWidth)
-        {
-            DetE += (*hits)[k]->GetEnergy();
-            ++k;
-        }
-
-        // Dump accumulated energy to the histo
-        if(fabs(DetE) > 1e-12)
-        {
-            fHisto->FillHisto(0,DetE); // Detector histogram
-        }
-
-        // Recovering index for next iteration
-        i=k;
-    }
 }
 
 

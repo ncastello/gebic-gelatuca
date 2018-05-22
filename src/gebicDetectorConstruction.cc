@@ -33,6 +33,9 @@
 
 
 #include "gebicDetectorConstruction.hh"
+#include "gebicSensitiveDetector.hh"
+
+#include "G4SDManager.hh"
 #include "G4UImanager.hh"
 #include "G4Tubs.hh"
 #include "G4Box.hh"
@@ -67,7 +70,7 @@
 gebicDetectorConstruction::gebicDetectorConstruction()
 :logicWorld(0),  physiWorld(0),
  logicTarget1(0), physiTarget1(0),
- logicDetector(0), physiDetector(0),
+ _logicDetector(0), physiDetector(0),
  logicDetectorDeadLayer(0), physiDetectorDeadLayer(0),
  logicCap1(0), physiCap1(0),
  logicCap2(0), physiCap2(0),
@@ -801,8 +804,11 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     G4ThreeVector tdetDZ = G4ThreeVector(0.,0.,(fVacCryoLength/2.-fCapWindowWidth-fDistanceDetectorWindowCap-fDetectorLength/2.));
     logicDetectorDeadLayer = new G4LogicalVolume(solidDetDZ, DetectorMatter, "DetectorDeadLayer", 0, 0, 0);
     physiDetectorDeadLayer = new G4PVPlacement(G4Transform3D(rdet,tdetDZ), logicDetectorDeadLayer, "DetectorDeadLayer", logicVacCryo, false, 0);
-    logicDetector = new G4LogicalVolume(solidDet, DetectorMatter, "Detector", 0, 0, 0);
-	physiDetector = new G4PVPlacement(G4Transform3D(rdet,tdetDZ), logicDetector, "Detector", logicVacCryo, false, 0);
+    _logicDetector = new G4LogicalVolume(solidDet, DetectorMatter, "Detector", 0, 0, 0);
+    // XXX TO BE REMOVE with Geant4.10
+    this->ConstructSDandField();
+    // --> XXX TO BE REMOVE with Geant4.10
+	physiDetector = new G4PVPlacement(G4Transform3D(rdet,tdetDZ), _logicDetector, "Detector", logicVacCryo, false, 0);
 
 
 	// #################### Detector holder
@@ -935,7 +941,7 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	// exrdmDetectorSD* aDetectorSD = new exrdmDetectorSD( detectorTargetSDname );
 	// SDman->AddNewDetector( aDetectorSD );
 	// logicTarget->SetSensitiveDetector( aDetectorSD );
-	// logicDetector->SetSensitiveDetector( aDetectorSD );
+	// _logicDetector->SetSensitiveDetector( aDetectorSD );
 	//
 	//-------------------------------------------------
 	// regions
@@ -948,7 +954,7 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 
     //if(detectorRegion) delete detectorRegion;
 	detectorRegion   = new G4Region("Detector");
-	detectorRegion->AddRootLogicalVolume(logicDetector);
+	detectorRegion->AddRootLogicalVolume(_logicDetector);
 	detectorDeadLayerRegion = new G4Region("DetectorDeadLayer");
 	detectorDeadLayerRegion->AddRootLogicalVolume(logicDetectorDeadLayer);
 
@@ -1001,8 +1007,8 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	logicTarget1->SetVisAttributes(TargetVisAtt);
 	//logicTarget1->SetVisAttributes(G4VisAttributes::Invisible);
 	G4VisAttributes* DetectorVisAtt = new G4VisAttributes(G4Colour(1.0,0.,1.0));//magenta
-	logicDetector->SetVisAttributes(DetectorVisAtt);
-	//logicDetector->SetVisAttributes(G4VisAttributes::Invisible);
+	_logicDetector->SetVisAttributes(DetectorVisAtt);
+	//_logicDetector->SetVisAttributes(G4VisAttributes::Invisible);
 	G4VisAttributes* DeadVisAtt = new G4VisAttributes(G4Color(1.0,0.,0.));//red
 	logicDetectorDeadLayer->SetVisAttributes(DeadVisAtt);
 	//logicDetectorDeadLayer->SetVisAttributes(G4VisAttributes::Invisible);
@@ -1096,3 +1102,15 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 
   return physiWorld;
 }
+
+void gebicDetectorConstruction::ConstructSDandField()
+{
+    // sensitive detectors -----------------------------------------------------
+    auto sdManager = G4SDManager::GetSDMpointer();
+
+    auto HPGe = new gebicSensitiveDetector("/HPGe");
+    sdManager->AddNewDetector(HPGe);
+    _logicDetector->SetSensitiveDetector(HPGe);
+
+}
+

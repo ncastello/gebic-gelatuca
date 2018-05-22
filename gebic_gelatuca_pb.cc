@@ -14,9 +14,8 @@
 #include "gebicPhysicsList.hh"
 #include "gebicEventAction.hh"
 #include "gebicRunAction.hh"
-#include "gebicSteppingAction.hh"
 #include "gebicPrimaryGeneratorAction.hh"
-#include "gebicAnalysisManager.hh"
+//#include "gebicAnalysisManager.hh"
 #include "Randomize.hh"
 
 #ifdef G4VIS_USE
@@ -95,7 +94,7 @@ int main(int argc,char** argv)
     G4RunManager* runManager = new G4RunManager;
 
     // Creation of the analysis manager
-    gebicAnalysisManager::GetInstance();
+    //gebicAnalysisManager::GetInstance();
 
     // set mandatory initialization classes
     gebicDetectorConstruction* Detector = new gebicDetectorConstruction;
@@ -104,9 +103,9 @@ int main(int argc,char** argv)
 
     // set mandatory user action class
     runManager->SetUserAction(new gebicPrimaryGeneratorAction);
-    runManager->SetUserAction(new gebicRunAction);
-    runManager->SetUserAction(new gebicEventAction);
-    runManager->SetUserAction(new gebicSteppingAction);
+    auto eventAction = new gebicEventAction;
+    runManager->SetUserAction(eventAction);
+    runManager->SetUserAction(new gebicRunAction(eventAction));
 
     #ifdef G4VIS_USE
     // visualization manager
@@ -142,7 +141,7 @@ int main(int argc,char** argv)
 #ifdef G4VIS_USE
     delete visManager;
 #endif
-    gebicAnalysisManager::Dispose();
+    //gebicAnalysisManager::Dispose();
     delete runManager;
 
     return 0;

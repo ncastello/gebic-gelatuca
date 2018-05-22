@@ -29,6 +29,7 @@ class gebicHit : public G4VHit
 
 };
 
-typedef G4THitsCollection<gebicHit> gebicHitCollection;
+//typedef G4THitsCollection<gebicHit> gebicHitCollection;
+using gebicHitCollection = G4THitsCollection<gebicHit>;
 
 #endif

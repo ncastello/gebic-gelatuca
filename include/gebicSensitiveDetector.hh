@@ -1,11 +1,10 @@
 #ifndef GEBICSENSITIVEDETECTOR_HH
 #define GEBICSENSITIVEDETECTOR_HH
 
-#include "G4SensitiveDetector.hh"
+#include "G4VSensitiveDetector.hh"
+#include "gebicHit.hh"
 
-class gebicHitCollection;
-
-class gebicSensitiveDetector : public G4SensitiveDetector
+class gebicSensitiveDetector : public G4VSensitiveDetector
 {
     public:
         /// Constructor
