@@ -70,10 +70,10 @@ void gebicEventAction::BeginOfEventAction(const G4Event* evt)
     _hitCollectionID = G4SDManager::GetSDMpointer()->GetCollectionID(_hitCollectionName);
 
     // XXX TO BE REMOVED with 4.10
-    //if(evt->GetEventID() % 10000 == 0)
-    //{
+    if(evt->GetEventID() % 10000 == 0)
+    {
         G4cout << "Processed event: "<< evt->GetEventID() << G4endl;
-    //}
+    }
     // -->> XXX TO BE REMOVED with 4.10
 }
 
@@ -110,7 +110,6 @@ void gebicEventAction::EndOfEventAction(const G4Event* event)
             [] (gebicHit *l, gebicHit *r) -> bool { return (*l < *r); } );
 
     // emulating readout electronic time (very, very simple)
-std::cout << " ABans " << __ne << std::endl;
     for(unsigned int i=0; i< hits->size(); ++i )
     {
         const G4double Time0 = (*hits)[i]->GetTime();
@@ -138,5 +137,4 @@ std::cout << " ABans " << __ne << std::endl;
         i=k;
     }
     analysisManager->AddNtupleRow();
-std::cout << " --> " << __ne << std::endl;
 }
