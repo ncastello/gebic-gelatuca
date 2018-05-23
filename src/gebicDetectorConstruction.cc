@@ -321,7 +321,8 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	//G4ThreeVector tcu2 = G4ThreeVector(0.,0.,(fWorldLength/2.-fShieldPbDim4-fShieldCuDim4/2.));
     G4ThreeVector tcu2 = G4ThreeVector(0.,0.,(fDistanceEndcapCeiling+fShieldCuDim4/2.));
 	logicCuShield2 = new G4LogicalVolume(doorCuShield,ShieldCuMatter,"CuShield2",0,0,0);//top Cu
-	//NCM remove CuShield2 (TAPA) from the world, to check 60Co ----> physiCuShield2 = new G4PVPlacement(G4Transform3D(rcu1,tcu2),logicCuShield2,"CuShield2",logicWorld,false,0);//top Cu
+	//NCM remove CuShield2 (TAPA) from the world, to check 60Co ---->
+    physiCuShield2 = new G4PVPlacement(G4Transform3D(rcu1,tcu2),logicCuShield2,"CuShield2",logicWorld,false,0);//top Cu
 
 
 	//G4ThreeVector tcu3 = G4ThreeVector(fShieldCuDim4/2.,(-fWorldDiameter/2.+fShieldPbDim4+fShieldCuDim4/2.),0.);
@@ -927,7 +928,8 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rm1.rotateZ(phiZ);
 	G4ThreeVector tar1 = G4ThreeVector(0.,0.,fL3/2.+9.9*mm);//!!!!check the distance sample-endcap and propagate it to all .mac files
 	logicTarget1 = new G4LogicalVolume(solidTar1,TarMatter,"Target1",0,0,0);
-	// NCM remove target from the world, to check 60Co --> physiTarget1 = new G4PVPlacement(G4Transform3D(rm1,tar1),logicTarget1,"Target1",logicWorld,false,0);
+	// NCM remove target from the world, to check 60Co -->
+    physiTarget1 = new G4PVPlacement(G4Transform3D(rm1,tar1),logicTarget1,"Target1",logicWorld,false,0);
 
 
 
