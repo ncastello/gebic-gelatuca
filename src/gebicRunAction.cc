@@ -37,11 +37,11 @@ gebicRunAction::gebicRunAction( gebicEventAction * eventAction ) :
         analysisManager->CreateNtuple("gebicMC","HPGe simulation at Canfrac");
 //      Probably not valid for Geant4.9
 //        analysisManager
-//            ->CreateNtupleDColumn("Edep", _eventAction->GetEdep());
+//            ->CreateNtupleDColumn("Edep", eventAction->GetEdep());
         // XXX TO BE REMOVED when migrating 4.10!!!!
         const int ntuple_id = analysisManager->CreateNtupleFColumn("Edep");
 
-        _eventAction->set_ntuple_id(ntuple_id);
+       _eventAction->set_ntuple_id(ntuple_id);
         // --->> XXX TO BE REMOVED when migrating 4.10!!!!
 
         analysisManager->FinishNtuple();

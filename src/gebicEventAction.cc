@@ -41,8 +41,6 @@ gebicEventAction::gebicEventAction():
     _pulseWidth(1.*microsecond)
 {
     _eventMessenger = new gebicEventActionMessenger(this);
-    // XXX TO BE UNCOMMENT with 4.10
-    //G4RunManager::GetRunManager()->SetPrintProgress(10000);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
@@ -68,13 +66,6 @@ void gebicEventAction::BeginOfEventAction(const G4Event* evt)
 {
     //gebicAnalysisManager::GetInstance()->BeginOfEvent();
     _hitCollectionID = G4SDManager::GetSDMpointer()->GetCollectionID(_hitCollectionName);
-
-    // XXX TO BE REMOVED with 4.10
-    if(evt->GetEventID() % 10000 == 0)
-    {
-        G4cout << "Processed event: "<< evt->GetEventID() << G4endl;
-    }
-    // -->> XXX TO BE REMOVED with 4.10
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
