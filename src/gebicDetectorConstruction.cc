@@ -67,41 +67,34 @@
 #include "G4ios.hh"
 #include <sstream>
 
-gebicDetectorConstruction::gebicDetectorConstruction()
-:logicWorld(0),  physiWorld(0),
- logicTarget1(0), physiTarget1(0),
- _logicDetector(0), physiDetector(0),
- logicDetectorDeadLayer(0), physiDetectorDeadLayer(0),
- logicCap1(0), physiCap1(0),
- logicCap2(0), physiCap2(0),
- logicCap3(0), physiCap3(0),
- logicVacCryo(0), physiVacCryo(0),
- logicHolder1(0), physiHolder1(0),
- logicHolder2(0), physiHolder2(0),
- logicLayerThinPb1(0),physiLayerThinPb1(0),
- logicLayerThinPb2(0),physiLayerThinPb2(0),
- logicLayerThinPb3(0),physiLayerThinPb3(0),
- logicLayerThinPb4(0),physiLayerThinPb4(0),
- logicLayerThinPb5(0),physiLayerThinPb5(0),
- logicLayerPb(0), physiLayerPb(0),
- logicPbShield1(0),physiPbShield1(0),
- logicPbShield2(0),physiPbShield2(0),
- logicPbShield3(0),physiPbShield3(0),
- logicPbShield4(0),physiPbShield4(0),
- logicPbShield5(0),physiPbShield5(0),
- logicPbShield6(0),physiPbShield6(0),
- logicPbShield7(0),physiPbShield7(0),
- logicPbShield8(0),physiPbShield8(0),
- logicPbShield9(0),physiPbShield9(0),
- logicPbShield10(0),physiPbShield10(0),
- logicCuShield1(0),physiCuShield1(0),
- logicCuShield2(0),physiCuShield2(0),
- logicCuShield3(0),physiCuShield3(0),
- logicCuShield4(0),physiCuShield4(0),
- logicCuShield5(0),physiCuShield5(0),
- logicCuShield6(0),physiCuShield6(0),
- DefaultMatter(0), TarMatter(0), DetectorMatter(0), CapMatter(0),
- VacCryoMatter(0), HolderMatter(0), LayerPbMatter(0), ShieldPbMatter(0), ShieldCuMatter(0)
+gebicDetectorConstruction::gebicDetectorConstruction() :
+    _targetMaterialName(""),
+    _targetLx(150.0*mm),
+    _targetLy(50.0*mm),
+    _targetLz(25.0*mm),
+    _logicDetector(nullptr),
+    _logicDetectorDeadLayer(nullptr),
+    _logicTarget(nullptr),
+    _defaultMatter(nullptr),
+    _tarMatter(nullptr),
+    _shieldPbMatter(nullptr),
+    _shieldCuMatter(nullptr),
+    _detectorMatter(nullptr),
+    _capMatter(nullptr),
+    _holderMatter(nullptr),
+    _layerPbMatter(nullptr),
+    _vacCryoMatter(nullptr),
+    _targetRegion1(nullptr),
+    _detectorRegion(nullptr),
+    _detectorDeadLayerRegion(nullptr),
+    _capRegion(nullptr),
+    _shieldPbRegion(nullptr),
+    _shieldCuRegion(nullptr),
+    //_supportRegion(nullptr),
+    _holderRegion(nullptr),
+    _layerPbRegion(nullptr),
+    _layerThinPbRegion(nullptr),
+    _visAttrs()
 {
     //detectorMessenger = new gebicDetectorMessenger(this);
     DefineMaterials();
@@ -155,9 +148,9 @@ gebicDetectorConstruction::gebicDetectorConstruction()
 	fLayerThinPbL3 = 10.0*mm;
 
     //Dimensions of the Target(s) (DAMIC)
-    fL1 = 150.0*mm;//x
-    fL2 = 50.0*mm;//y
-    fL3 = 25.0*mm;//z
+    //_targetLx = 150.0*mm;//x
+    //_targetLy = 50.0*mm;//y
+    //_targetLz = 25.0*mm;//z
 
     //Dimensions of the Cu shield
     fShieldCuDim1 = 500.0*mm;
@@ -185,48 +178,72 @@ gebicDetectorConstruction::gebicDetectorConstruction()
 
 gebicDetectorConstruction::~gebicDetectorConstruction()
 {
+    for(auto * visAttributes: _visAttrs)
+    {
+        if(visAttributes != nullptr)
+        {
+            delete visAttributes;
+            visAttributes = nullptr;
+        }
+    }
     //delete detectorMessenger;
 }
 
 void gebicDetectorConstruction::DefineMaterials()
 {
-    G4UnitDefinition::BuildUnitsTable();
-
 	//Material definition
-	G4String name,symbol;
+	//G4String name,symbol;
 
+    G4UnitDefinition::BuildUnitsTable();
 	G4NistManager* nistman = G4NistManager::Instance();
 	nistman->SetVerbose(1);
 
-	DefaultMatter = nistman->FindOrBuildMaterial("G4_AIR");
+	_defaultMatter = nistman->FindOrBuildMaterial("G4_AIR");
 
-    TarMatter = nistman->FindOrBuildMaterial("G4_Pb");
+    _tarMatter = nistman->FindOrBuildMaterial("G4_Pb");
 
-	ShieldPbMatter = nistman->FindOrBuildMaterial("G4_Pb");
-	ShieldCuMatter = nistman->FindOrBuildMaterial("G4_Cu");
-	DetectorMatter = nistman->FindOrBuildMaterial("G4_Ge");
+	_shieldPbMatter = nistman->FindOrBuildMaterial("G4_Pb");
+	_shieldCuMatter = nistman->FindOrBuildMaterial("G4_Cu");
+	_detectorMatter = nistman->FindOrBuildMaterial("G4_Ge");
 
-	CapMatter = nistman->FindOrBuildMaterial("G4_Al");
-	HolderMatter = nistman->FindOrBuildMaterial("G4_Al");
-	LayerPbMatter = ShieldPbMatter;
-	//SupportMatter = nistman->FindOrBuildMaterial("G4_POLYPROPYLENE");
-	VacCryoMatter = nistman->FindOrBuildMaterial("G4_Galactic");
+	_capMatter = nistman->FindOrBuildMaterial("G4_Al");
+	_holderMatter = nistman->FindOrBuildMaterial("G4_Al");
+	_layerPbMatter = _shieldPbMatter;
+	//_supportMatter = nistman->FindOrBuildMaterial("G4_POLYPROPYLENE");
+	_vacCryoMatter = nistman->FindOrBuildMaterial("G4_Galactic");
 }
 
 
 
 G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 {
-	// ##################### World
-	G4Box* solidWorld= new G4Box("world", fWorldDiameter/2., fWorldDiameter/2., fWorldLength/2.);
-	logicWorld= new G4LogicalVolume(solidWorld, DefaultMatter, "World", 0, 0, 0);
-	physiWorld = new G4PVPlacement(0, G4ThreeVector(), logicWorld, "World", 0, false, 0);
+    const bool checkOverlaps = false;
+
+    // ##################### World
+	G4Box* solidWorld= new G4Box("world",
+            fWorldDiameter/2.,
+            fWorldDiameter/2.,
+            fWorldLength/2.);
+
+	_logicWorld= new G4LogicalVolume(solidWorld, _defaultMatter, "World", 0, 0, 0);
+
+    G4VPhysicalVolume* physiWorld = new G4PVPlacement(0,
+            G4ThreeVector(),
+            _logicWorld,
+            "World",
+            0,
+            false,
+            checkOverlaps);
 
 	// ##################### Pb shield
-	G4Box* basePbShield = new G4Box("basePbShield", fShieldPbDim1/2., fShieldPbDim1/2., fShieldPbDim4/2.);
-	G4Box* wallPbShield = new G4Box("wall1PbShield", fShieldPbDim2/2., fShieldPbDim4/2., fShieldPbDim3/2.);
-    G4Box* doorPbShield = new G4Box("doorPbShield", fShieldPbDim5/2., fShieldPbDim5/2., fShieldPbDim4/2.);
-    G4Box* walltopPbShield = new G4Box("walltopPbShield", (fShieldPbDim5+fShieldPbDim7)/2., fShieldPbDim7/2., fShieldPbDim6/2.);
+	G4Box* basePbShield = new G4Box("basePbShield",
+            fShieldPbDim1/2., fShieldPbDim1/2., fShieldPbDim4/2.);
+	G4Box* wallPbShield = new G4Box("wall1PbShield",
+            fShieldPbDim2/2., fShieldPbDim4/2., fShieldPbDim3/2.);
+    G4Box* doorPbShield = new G4Box("doorPbShield",
+            fShieldPbDim5/2., fShieldPbDim5/2., fShieldPbDim4/2.);
+    G4Box* walltopPbShield = new G4Box("walltopPbShield",
+            (fShieldPbDim5+fShieldPbDim7)/2., fShieldPbDim7/2., fShieldPbDim6/2.);
 
 	G4double phiX=0.*deg;
 	G4double phiY=0.*deg;
@@ -239,25 +256,57 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 
 	//G4ThreeVector tpb1 = G4ThreeVector(0.,0.,(-fWorldLength/2.+fShieldPbDim4/2.));
     G4ThreeVector tpb1 = G4ThreeVector(0.,0.,(-fDistanceEndcapFloor-fShieldCuDim4-fShieldPbDim4/2.));
-	logicPbShield1 = new G4LogicalVolume(basePbShield,ShieldPbMatter,"PbShield1",0,0,0);//base Pb
-	physiPbShield1 = new G4PVPlacement(G4Transform3D(rpb1,tpb1),logicPbShield1,"PbShield1",logicWorld,false,0);//base Pb
+	G4LogicalVolume* logicPbShield1 =
+        new G4LogicalVolume(basePbShield,_shieldPbMatter,"PbShield1",0,0,0);//base Pb
+	new G4PVPlacement(
+            G4Transform3D(rpb1,tpb1),
+            logicPbShield1,
+            "PbShield1",
+            _logicWorld,
+            false,
+            checkOverlaps);//base Pb
 
 	//G4ThreeVector tpb2 = G4ThreeVector(0.,0.,(fWorldLength/2.-fShieldPbDim4/2.));
     G4ThreeVector tpb2 = G4ThreeVector(0.,0.,(fDistanceEndcapCeiling+fShieldCuDim4+fShieldPbDim4/2.));
-	logicPbShield2 = new G4LogicalVolume(doorPbShield,ShieldPbMatter,"PbShield2",0,0,0);//door Pb
-	physiPbShield2 = new G4PVPlacement(G4Transform3D(rpb1,tpb2),logicPbShield2,"PbShield2",logicWorld,false,0);//top Pb
+	G4LogicalVolume* logicPbShield2 =
+        new G4LogicalVolume(doorPbShield,_shieldPbMatter,"PbShield2",0,0,0);//door Pb
+	new G4PVPlacement(
+            G4Transform3D(rpb1,tpb2),
+            logicPbShield2,
+            "PbShield2",
+            _logicWorld,
+            false,
+            checkOverlaps);//top Pb
 
 
 	//G4ThreeVector tpb3 = G4ThreeVector(fShieldPbDim4/2.,(-fWorldDiameter/2.+fShieldPbDim4/2.),-fWorldLength/2.+fShieldPbDim4+fShieldPbDim3/2.);
-    G4ThreeVector tpb3 = G4ThreeVector(fShieldPbDim4/2.,(-fWorldDiameter/2.+fShieldPbDim4/2.),(-fDistanceEndcapFloor-fShieldCuDim4+fShieldPbDim3/2.));
-	logicPbShield3 = new G4LogicalVolume(wallPbShield,ShieldPbMatter,"PbShield3",0,0,0);//front wall Pb
-	physiPbShield3 = new G4PVPlacement(G4Transform3D(rpb1,tpb3),logicPbShield3,"PbShield3",logicWorld,false,0);//front wall Pb
+    G4ThreeVector tpb3 = G4ThreeVector(fShieldPbDim4/2.,
+            (-fWorldDiameter/2.+fShieldPbDim4/2.),
+            (-fDistanceEndcapFloor-fShieldCuDim4+fShieldPbDim3/2.));
+	G4LogicalVolume* logicPbShield3 = new G4LogicalVolume(wallPbShield,
+            _shieldPbMatter,"PbShield3",0,0,0);//front wall Pb
+	new G4PVPlacement(
+            G4Transform3D(rpb1,tpb3),
+            logicPbShield3,
+            "PbShield3",
+            _logicWorld,
+            false,
+            checkOverlaps);//front wall Pb
 
 
 	//G4ThreeVector tpb4 = G4ThreeVector(-fShieldPbDim4/2.,(fWorldDiameter/2.-fShieldPbDim4/2.),-fWorldLength/2.+fShieldPbDim4+fShieldPbDim3/2.);
-    G4ThreeVector tpb4 = G4ThreeVector(-fShieldPbDim4/2.,(fWorldDiameter/2.-fShieldPbDim4/2.),(-fDistanceEndcapFloor-fShieldCuDim4+fShieldPbDim3/2.));
-	logicPbShield4 = new G4LogicalVolume(wallPbShield,ShieldPbMatter,"PbShield4",0,0,0);//back wall Pb
-	physiPbShield4 = new G4PVPlacement(G4Transform3D(rpb1,tpb4),logicPbShield4,"PbShield4",logicWorld,false,0);//back wall Pb
+    G4ThreeVector tpb4 = G4ThreeVector(-fShieldPbDim4/2.,
+            (fWorldDiameter/2.-fShieldPbDim4/2.),
+            (-fDistanceEndcapFloor-fShieldCuDim4+fShieldPbDim3/2.));
+	G4LogicalVolume* logicPbShield4 =
+        new G4LogicalVolume(wallPbShield,_shieldPbMatter,"PbShield4",0,0,0);//back wall Pb
+	new G4PVPlacement(
+            G4Transform3D(rpb1,tpb4),
+            logicPbShield4,
+            "PbShield4",
+            _logicWorld,
+            false,
+            checkOverlaps);//back wall Pb
 
 	phiX=0.*deg;
 	phiY=0.*deg;
@@ -266,38 +315,96 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rpb2.rotateX(phiX);
     rpb2.rotateY(phiY);
     rpb2.rotateZ(phiZ);
-	//G4ThreeVector tpb5 = G4ThreeVector((-fWorldDiameter/2.+fShieldPbDim4/2.),-fShieldPbDim4/2.,-fWorldLength/2.+fShieldPbDim4+fShieldPbDim3/2.);
-    G4ThreeVector tpb5 = G4ThreeVector((-fWorldDiameter/2.+fShieldPbDim4/2.),-fShieldPbDim4/2.,(-fDistanceEndcapFloor-fShieldCuDim4+fShieldPbDim3/2.));
-	logicPbShield5 = new G4LogicalVolume(wallPbShield,ShieldPbMatter,"PbShield5",0,0,0);//left wall Pb
-	physiPbShield5 = new G4PVPlacement(G4Transform3D(rpb2,tpb5),logicPbShield5,"PbShield5",logicWorld,false,0);//left wall Pb
+
+    //G4ThreeVector tpb5 = G4ThreeVector((-fWorldDiameter/2.+fShieldPbDim4/2.),-fShieldPbDim4/2.,-fWorldLength/2.+fShieldPbDim4+fShieldPbDim3/2.);
+    G4ThreeVector tpb5 =
+        G4ThreeVector((-fWorldDiameter/2.+fShieldPbDim4/2.),
+                -fShieldPbDim4/2.,
+                (-fDistanceEndcapFloor-fShieldCuDim4+fShieldPbDim3/2.));
+	G4LogicalVolume* logicPbShield5 =
+        new G4LogicalVolume(wallPbShield,_shieldPbMatter,"PbShield5",0,0,0);//left wall Pb
+	new G4PVPlacement(
+            G4Transform3D(rpb2,tpb5),
+            logicPbShield5,
+            "PbShield5",
+            _logicWorld,
+            false,
+            checkOverlaps);//left wall Pb
 
 	//G4ThreeVector tpb6 = G4ThreeVector((fWorldDiameter/2.-fShieldPbDim4/2.),fShieldPbDim4/2.,-fWorldLength/2.+fShieldPbDim4+fShieldPbDim3/2.);
-    G4ThreeVector tpb6 = G4ThreeVector((fWorldDiameter/2.-fShieldPbDim4/2.),fShieldPbDim4/2.,(-fDistanceEndcapFloor-fShieldCuDim4+fShieldPbDim3/2.));
-	logicPbShield6 = new G4LogicalVolume(wallPbShield,ShieldPbMatter,"PbShield6",0,0,0);//right wall Pb
-	physiPbShield6 = new G4PVPlacement(G4Transform3D(rpb2,tpb6),logicPbShield6,"PbShield6",logicWorld,false,0);//right wall Pb
+    G4ThreeVector tpb6 =
+        G4ThreeVector((fWorldDiameter/2.-fShieldPbDim4/2.),
+                fShieldPbDim4/2.,
+                (-fDistanceEndcapFloor-fShieldCuDim4+fShieldPbDim3/2.));
+	G4LogicalVolume* logicPbShield6 =
+        new G4LogicalVolume(wallPbShield,_shieldPbMatter,"PbShield6",0,0,0);//right wall Pb
+	new G4PVPlacement(
+            G4Transform3D(rpb2,tpb6),
+            logicPbShield6,
+            "PbShield6",
+            _logicWorld,
+            false,checkOverlaps);//right wall Pb
 
 
     //G4ThreeVector tpb7 = G4ThreeVector(fShieldPbDim4/2.+25.0*mm,(-fWorldDiameter/2.+fShieldPbDim7/2.),fWorldLength/2.-fShieldPbDim6/2.);
-    G4ThreeVector tpb7 = G4ThreeVector((fShieldPbDim4/2.+25.0*mm),(-fWorldDiameter/2.+fShieldPbDim7/2.),(fDistanceEndcapCeiling+fShieldPbDim6/2.));
-    logicPbShield7 = new G4LogicalVolume(walltopPbShield,ShieldPbMatter,"PbShield7",0,0,0);//front top wall Pb
-    physiPbShield7 = new G4PVPlacement(G4Transform3D(rpb1,tpb7),logicPbShield7,"PbShield7",logicWorld,false,0);//front wall top Pb
-
+    G4ThreeVector tpb7 =
+        G4ThreeVector((fShieldPbDim4/2.+25.0*mm),
+                (-fWorldDiameter/2.+fShieldPbDim7/2.),
+                (fDistanceEndcapCeiling+fShieldPbDim6/2.));
+    G4LogicalVolume* logicPbShield7 =
+        new G4LogicalVolume(walltopPbShield,_shieldPbMatter,"PbShield7",0,0,0);//front top wall Pb
+    new G4PVPlacement(
+            G4Transform3D(rpb1,tpb7),
+            logicPbShield7,
+            "PbShield7",
+            _logicWorld,
+            false,
+            checkOverlaps);//front wall top Pb
 
     //G4ThreeVector tpb8 = G4ThreeVector(-fShieldPbDim4/2.-25.0*mm,(fWorldDiameter/2.-fShieldPbDim7/2.),fWorldLength/2.-fShieldPbDim6/2.);
-    G4ThreeVector tpb8 = G4ThreeVector((-fShieldPbDim4/2.-25.0*mm),(fWorldDiameter/2.-fShieldPbDim7/2.),(fDistanceEndcapCeiling+fShieldPbDim6/2.));
-    logicPbShield8 = new G4LogicalVolume(walltopPbShield,ShieldPbMatter,"PbShield8",0,0,0);//back wall top Pb
-    physiPbShield8 = new G4PVPlacement(G4Transform3D(rpb1,tpb8),logicPbShield8,"PbShield8",logicWorld,false,0);//back wall top Pb
-
+    G4ThreeVector tpb8 =
+        G4ThreeVector((-fShieldPbDim4/2.-25.0*mm),
+                (fWorldDiameter/2.-fShieldPbDim7/2.),
+                (fDistanceEndcapCeiling+fShieldPbDim6/2.));
+    G4LogicalVolume* logicPbShield8 =
+        new G4LogicalVolume(walltopPbShield,_shieldPbMatter,"PbShield8",0,0,0);//back wall top Pb
+    new G4PVPlacement(
+            G4Transform3D(rpb1,tpb8),
+            logicPbShield8,
+            "PbShield8",
+            _logicWorld,
+            false,
+            checkOverlaps);//back wall top Pb
 
     //G4ThreeVector tpb9 = G4ThreeVector((-fWorldDiameter/2.+fShieldPbDim7/2.),-fShieldPbDim4/2.-25.0*mm,fWorldLength/2.-fShieldPbDim6/2.);
-    G4ThreeVector tpb9 = G4ThreeVector((-fWorldDiameter/2.+fShieldPbDim7/2.),(-fShieldPbDim4/2.-25.0*mm),(fDistanceEndcapCeiling+fShieldPbDim6/2.));
-    logicPbShield9 = new G4LogicalVolume(walltopPbShield,ShieldPbMatter,"PbShield9",0,0,0);//left wall top Pb
-    physiPbShield9 = new G4PVPlacement(G4Transform3D(rpb2,tpb9),logicPbShield9,"PbShield9",logicWorld,false,0);//left wall top Pb
+    G4ThreeVector tpb9 =
+        G4ThreeVector((-fWorldDiameter/2.+fShieldPbDim7/2.),
+                (-fShieldPbDim4/2.-25.0*mm),
+                (fDistanceEndcapCeiling+fShieldPbDim6/2.));
+    G4LogicalVolume* logicPbShield9 =
+        new G4LogicalVolume(walltopPbShield,_shieldPbMatter,"PbShield9",0,0,0);//left wall top Pb
+    new G4PVPlacement(
+            G4Transform3D(rpb2,tpb9),
+            logicPbShield9,
+            "PbShield9",
+            _logicWorld,
+            false,
+            checkOverlaps);//left wall top Pb
 
     //G4ThreeVector tpb10 = G4ThreeVector((fWorldDiameter/2.-fShieldPbDim7/2.),fShieldPbDim4/2.+25.0*mm,fWorldLength/2.-fShieldPbDim6/2.);
-    G4ThreeVector tpb10 = G4ThreeVector((fWorldDiameter/2.-fShieldPbDim7/2.),(fShieldPbDim4/2.+25.0*mm),(fDistanceEndcapCeiling+fShieldPbDim6/2.));
-    logicPbShield10 = new G4LogicalVolume(walltopPbShield,ShieldPbMatter,"PbShield10",0,0,0);//right wall top Pb
-    physiPbShield10 = new G4PVPlacement(G4Transform3D(rpb2,tpb10),logicPbShield10,"PbShield10",logicWorld,false,0);//right wall top Pb
+    G4ThreeVector tpb10 =
+        G4ThreeVector((fWorldDiameter/2.-fShieldPbDim7/2.),
+                (fShieldPbDim4/2.+25.0*mm),
+                (fDistanceEndcapCeiling+fShieldPbDim6/2.));
+    G4LogicalVolume* logicPbShield10 =
+        new G4LogicalVolume(walltopPbShield,_shieldPbMatter,"PbShield10",0,0,0);//right wall top Pb
+    new G4PVPlacement(
+            G4Transform3D(rpb2,tpb10),
+            logicPbShield10,
+            "PbShield10",
+            _logicWorld,
+            false,
+            checkOverlaps);//right wall top Pb
 
 
 	// ##################### Cu shield
@@ -315,26 +422,58 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rcu1.rotateZ(phiZ);
 	//G4ThreeVector tcu1 = G4ThreeVector(0.,0.,(-fWorldLength/2.+fShieldPbDim4+fShieldCuDim4/2.));
     G4ThreeVector tcu1 = G4ThreeVector(0.,0.,(-fDistanceEndcapFloor-fShieldCuDim4/2.));
-	logicCuShield1 = new G4LogicalVolume(baseCuShield,ShieldCuMatter,"CuShield1",0,0,0);//base Cu
-	physiCuShield1 = new G4PVPlacement(G4Transform3D(rcu1,tcu1),logicCuShield1,"CuShield1",logicWorld,false,0);//base Cu
+	G4LogicalVolume* logicCuShield1 =
+        new G4LogicalVolume(baseCuShield,_shieldCuMatter,"CuShield1",0,0,0);//base Cu
+	new G4PVPlacement(
+            G4Transform3D(rcu1,tcu1),
+            logicCuShield1,
+            "CuShield1",
+            _logicWorld,
+            false,
+            checkOverlaps);//base Cu
 
 	//G4ThreeVector tcu2 = G4ThreeVector(0.,0.,(fWorldLength/2.-fShieldPbDim4-fShieldCuDim4/2.));
     G4ThreeVector tcu2 = G4ThreeVector(0.,0.,(fDistanceEndcapCeiling+fShieldCuDim4/2.));
-	logicCuShield2 = new G4LogicalVolume(doorCuShield,ShieldCuMatter,"CuShield2",0,0,0);//top Cu
+	G4LogicalVolume* logicCuShield2 =
+        new G4LogicalVolume(doorCuShield,_shieldCuMatter,"CuShield2",0,0,0);//top Cu
 	//NCM remove CuShield2 (TAPA) from the world, to check 60Co ---->
-    physiCuShield2 = new G4PVPlacement(G4Transform3D(rcu1,tcu2),logicCuShield2,"CuShield2",logicWorld,false,0);//top Cu
-
+    new G4PVPlacement(
+            G4Transform3D(rcu1,tcu2),
+            logicCuShield2,
+            "CuShield2",
+            _logicWorld,
+            false,
+            checkOverlaps);//top Cu
 
 	//G4ThreeVector tcu3 = G4ThreeVector(fShieldCuDim4/2.,(-fWorldDiameter/2.+fShieldPbDim4+fShieldCuDim4/2.),0.);
-    G4ThreeVector tcu3 = G4ThreeVector(fShieldCuDim4/2.,(-fWorldDiameter/2.+fShieldPbDim4+fShieldCuDim4/2.),(-fDistanceEndcapFloor+fShieldCuDim3/2.));
-	logicCuShield3 = new G4LogicalVolume(wallCuShield,ShieldCuMatter,"CuShield3",0,0,0);//front wall Cu
-	physiCuShield3 = new G4PVPlacement(G4Transform3D(rcu1,tcu3),logicCuShield3,"CuShield3",logicWorld,false,0);//front wall Cu
-
+    G4ThreeVector tcu3 =
+        G4ThreeVector(fShieldCuDim4/2.,
+                (-fWorldDiameter/2.+fShieldPbDim4+fShieldCuDim4/2.),
+                (-fDistanceEndcapFloor+fShieldCuDim3/2.));
+	G4LogicalVolume* logicCuShield3 =
+        new G4LogicalVolume(wallCuShield,_shieldCuMatter,"CuShield3",0,0,0);//front wall Cu
+	new G4PVPlacement(
+            G4Transform3D(rcu1,tcu3),
+            logicCuShield3,
+            "CuShield3",
+            _logicWorld,
+            false,
+            checkOverlaps);//front wall Cu
 
 	//G4ThreeVector tcu4 = G4ThreeVector(-fShieldCuDim4/2.,(fWorldDiameter/2.-fShieldPbDim4-fShieldCuDim4/2.),0.);
-    G4ThreeVector tcu4 = G4ThreeVector(-fShieldCuDim4/2.,(fWorldDiameter/2.-fShieldPbDim4-fShieldCuDim4/2.),(-fDistanceEndcapFloor+fShieldCuDim3/2.));
-	logicCuShield4 = new G4LogicalVolume(wallCuShield,ShieldCuMatter,"CuShield4",0,0,0);//back wall Cu
-	physiCuShield4 = new G4PVPlacement(G4Transform3D(rcu1,tcu4),logicCuShield4,"CuShield4",logicWorld,false,0);//back wall Cu
+    G4ThreeVector tcu4 =
+        G4ThreeVector(-fShieldCuDim4/2.,
+                (fWorldDiameter/2.-fShieldPbDim4-fShieldCuDim4/2.),
+                (-fDistanceEndcapFloor+fShieldCuDim3/2.));
+	G4LogicalVolume* logicCuShield4 =
+        new G4LogicalVolume(wallCuShield,_shieldCuMatter,"CuShield4",0,0,0);//back wall Cu
+	new G4PVPlacement(
+            G4Transform3D(rcu1,tcu4),
+            logicCuShield4,
+            "CuShield4",
+            _logicWorld,
+            false,
+            checkOverlaps);//back wall Cu
 
 
 	phiX=0.*deg;
@@ -345,14 +484,34 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rcu2.rotateY(phiY);
     rcu2.rotateZ(phiZ);
 	//G4ThreeVector tcu5 = G4ThreeVector((-fWorldDiameter/2.+fShieldPbDim4+fShieldCuDim4/2.),-fShieldCuDim4/2.,0.);
-    G4ThreeVector tcu5 = G4ThreeVector((-fWorldDiameter/2.+fShieldPbDim4+fShieldCuDim4/2.),-fShieldCuDim4/2.,(-fDistanceEndcapFloor+fShieldCuDim3/2.));
-	logicCuShield5 = new G4LogicalVolume(wallCuShield,ShieldCuMatter,"CuShield5",0,0,0);//left wall Cu
-	physiCuShield5 = new G4PVPlacement(G4Transform3D(rcu2,tcu5),logicCuShield5,"CuShield5",logicWorld,false,0);//left wall Cu
+    G4ThreeVector tcu5 =
+        G4ThreeVector((-fWorldDiameter/2.+fShieldPbDim4+fShieldCuDim4/2.),
+                -fShieldCuDim4/2.,
+                (-fDistanceEndcapFloor+fShieldCuDim3/2.));
+	G4LogicalVolume* logicCuShield5 =
+        new G4LogicalVolume(wallCuShield,_shieldCuMatter,"CuShield5",0,0,0);//left wall Cu
+	new G4PVPlacement(
+            G4Transform3D(rcu2,tcu5),
+            logicCuShield5,
+            "CuShield5",
+            _logicWorld,
+            false,
+            checkOverlaps);//left wall Cu
 
 	//G4ThreeVector tcu6 = G4ThreeVector((fWorldDiameter/2.-fShieldPbDim4-fShieldCuDim4/2.),fShieldCuDim4/2.,0.);
-    G4ThreeVector tcu6 = G4ThreeVector((fWorldDiameter/2.-fShieldPbDim4-fShieldCuDim4/2.),fShieldCuDim4/2.,(-fDistanceEndcapFloor+fShieldCuDim3/2.));
-	logicCuShield6 = new G4LogicalVolume(wallCuShield,ShieldCuMatter,"CuShield6",0,0,0);//right wall Cu
-	physiCuShield6 = new G4PVPlacement(G4Transform3D(rcu2,tcu6),logicCuShield6,"CuShield6",logicWorld,false,0.);//right wall Cu
+    G4ThreeVector tcu6 =
+        G4ThreeVector((fWorldDiameter/2.-fShieldPbDim4-fShieldCuDim4/2.),
+                fShieldCuDim4/2.,
+                (-fDistanceEndcapFloor+fShieldCuDim3/2.));
+	G4LogicalVolume* logicCuShield6 =
+        new G4LogicalVolume(wallCuShield,_shieldCuMatter,"CuShield6",0,0,0);//right wall Cu
+	new G4PVPlacement(
+            G4Transform3D(rcu2,tcu6),
+            logicCuShield6,
+            "CuShield6",
+            _logicWorld,
+            false,
+            checkOverlaps);//right wall Cu
 
 
 	// ##################### VacCryo
@@ -365,14 +524,37 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rvc.rotateY(phiY);
     rvc.rotateZ(phiZ);
     G4ThreeVector tvc = G4ThreeVector(0.,0.,-fVacCryoLength/2.);
-	logicVacCryo = new G4LogicalVolume(solidVacCryo, VacCryoMatter, "VacCryo", 0, 0, 0);
-	physiVacCryo = new G4PVPlacement(G4Transform3D(rvc,tvc), logicVacCryo, "VacCryo", logicWorld, false, 0);
+	G4LogicalVolume* logicVacCryo =
+        new G4LogicalVolume(solidVacCryo, _vacCryoMatter, "VacCryo", 0, 0, 0);
+	new G4PVPlacement(
+            G4Transform3D(rvc,tvc),
+            logicVacCryo,
+            "VacCryo",
+            _logicWorld,
+            false,
+            checkOverlaps);
 
 	// ##################### Cap
 	G4double fCapWidth2 = (fCapExternalDiameter-fCapInternalDiameter)/2.-fCapWindowWidth;
-	G4Tubs* solidCap1 = new G4Tubs("solidCap1", 0, fCapInternalDiameter/2., fCapWindowWidth/2., 0, twopi);//window part of cap -- upper part
-	G4Tubs* solidCap2 = new G4Tubs("solidCap2", fCapWindowDiameter/2., fCapInternalDiameter/2., fCapWidth2/2., 0, twopi);//window part of cap -- hole part
-	G4Tubs* solidCap3 = new G4Tubs("solidCap3",fCapInternalDiameter/2.,fCapExternalDiameter/2.,fCapLength/2.,0.,twopi);//cap body
+	G4Tubs* solidCap1 =
+        new G4Tubs("solidCap1", 0,
+                fCapInternalDiameter/2.,
+                fCapWindowWidth/2.,
+                0, twopi);//window part of cap -- upper part
+
+	G4Tubs* solidCap2 =
+        new G4Tubs("solidCap2",
+                fCapWindowDiameter/2.,
+                fCapInternalDiameter/2.,
+                fCapWidth2/2.,
+                0, twopi);//window part of cap -- hole part
+
+    G4Tubs* solidCap3 =
+        new G4Tubs("solidCap3",
+                fCapInternalDiameter/2.,
+                fCapExternalDiameter/2.,
+                fCapLength/2.,
+                0.,twopi);//cap body
 	phiX=0.*deg;
 	phiY=0.*deg;
 	phiZ=0.*deg;
@@ -381,14 +563,33 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rcap.rotateY(phiY);
     rcap.rotateZ(phiZ);
     G4ThreeVector tcap1 = G4ThreeVector(0.,0.,(fVacCryoLength/2.-fCapWindowWidth/2.));
-    logicCap1 = new G4LogicalVolume(solidCap1, CapMatter, "Cap1", 0, 0, 0);
-	physiCap1 = new G4PVPlacement(G4Transform3D(rcap,tcap1), logicCap1, "Cap1", logicVacCryo, false, 0);
+    G4LogicalVolume* logicCap1 = new G4LogicalVolume(solidCap1, _capMatter, "Cap1", 0, 0, 0);
+	new G4PVPlacement(
+            G4Transform3D(rcap,tcap1),
+            logicCap1,
+            "Cap1",
+            logicVacCryo,
+            false,
+            checkOverlaps);
+
 	G4ThreeVector tcap2 = G4ThreeVector(0.,0.,(fVacCryoLength/2.-fCapWindowWidth-fCapWidth2/2.));
-    logicCap2 = new G4LogicalVolume(solidCap2, CapMatter, "Cap2", 0, 0, 0);
-	physiCap2 = new G4PVPlacement(G4Transform3D(rcap,tcap2), logicCap2, "Cap2", logicVacCryo, false, 0);
+    G4LogicalVolume* logicCap2 = new G4LogicalVolume(solidCap2, _capMatter, "Cap2", 0, 0, 0);
+	new G4PVPlacement(
+            G4Transform3D(rcap,tcap2), logicCap2
+            , "Cap2",
+            logicVacCryo,
+            false,
+            checkOverlaps);
+
 	G4ThreeVector tcap3 = G4ThreeVector(0.,0.,0.);
-    logicCap3 = new G4LogicalVolume(solidCap3, CapMatter, "Cap3", 0, 0, 0);
-	physiCap3 = new G4PVPlacement(G4Transform3D(rcap,tcap3), logicCap3, "Cap3", logicVacCryo, false, 0);
+    G4LogicalVolume* logicCap3 = new G4LogicalVolume(solidCap3, _capMatter, "Cap3", 0, 0, 0);
+	new G4PVPlacement(
+            G4Transform3D(rcap,tcap3),
+            logicCap3,
+            "Cap3",
+            logicVacCryo,
+            false,
+            checkOverlaps);
 
 
 	// ##################### Detector
@@ -487,6 +688,8 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     //order 8 new: v=v4
     //Order 9 new: v>v4, v<22. mm
 
+    G4Polycone * solidDetDZ = nullptr;
+    G4Polycone * solidDet = nullptr;
     if (fDetectorDeadLayer>0. && fDetectorDeadLayer<z1)
     {
         G4int numZPlanesDZ = 13;
@@ -803,13 +1006,22 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rdet.rotateZ(phiZ);
 
     G4ThreeVector tdetDZ = G4ThreeVector(0.,0.,(fVacCryoLength/2.-fCapWindowWidth-fDistanceDetectorWindowCap-fDetectorLength/2.));
-    logicDetectorDeadLayer = new G4LogicalVolume(solidDetDZ, DetectorMatter, "DetectorDeadLayer", 0, 0, 0);
-    physiDetectorDeadLayer = new G4PVPlacement(G4Transform3D(rdet,tdetDZ), logicDetectorDeadLayer, "DetectorDeadLayer", logicVacCryo, false, 0);
-    _logicDetector = new G4LogicalVolume(solidDet, DetectorMatter, "Detector", 0, 0, 0);
-    // XXX TO BE REMOVE with Geant4.10
-    //this->ConstructSDandField();
-    // --> XXX TO BE REMOVE with Geant4.10
-	physiDetector = new G4PVPlacement(G4Transform3D(rdet,tdetDZ), _logicDetector, "Detector", logicVacCryo, false, 0);
+    _logicDetectorDeadLayer = new G4LogicalVolume(solidDetDZ, _detectorMatter, "DetectorDeadLayer", 0, 0, 0);
+    new G4PVPlacement(
+            G4Transform3D(rdet,tdetDZ),
+            _logicDetectorDeadLayer,
+            "DetectorDeadLayer",
+            logicVacCryo,
+            false,
+            checkOverlaps);
+    _logicDetector = new G4LogicalVolume(solidDet, _detectorMatter, "Detector", 0, 0, 0);
+	new G4PVPlacement(
+            G4Transform3D(rdet,tdetDZ),
+            _logicDetector,
+            "Detector",
+            logicVacCryo,
+            false,
+            checkOverlaps);
 
 
 	// #################### Detector holder
@@ -828,10 +1040,24 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 		-fDistanceDetectorWindowCap-fDetectorOverHolder-(fHolderLength-fHolderBottomWidth)/2.));
 	G4ThreeVector thold2 = G4ThreeVector(0, 0,(fVacCryoLength/2.-fCapWindowWidth
 		-fDistanceDetectorWindowCap-fDetectorOverHolder-fHolderLength+fHolderBottomWidth/2.));
-	logicHolder1 = new G4LogicalVolume(solidHolderH, HolderMatter, "Holder1", 0, 0, 0);
-	physiHolder1 = new G4PVPlacement(G4Transform3D(rhold,thold1), logicHolder1, "Holder1", logicVacCryo, false, 0);
-	logicHolder2 = new G4LogicalVolume(solidHolderNH, HolderMatter, "Holder2", 0, 0, 0);
-	physiHolder2 = new G4PVPlacement(G4Transform3D(rhold,thold2), logicHolder2, "Holder2", logicVacCryo, false, 0);
+    auto logicHolder1 =
+        new G4LogicalVolume(solidHolderH, _holderMatter, "Holder1", 0, 0, 0);
+	new G4PVPlacement(
+            G4Transform3D(rhold,thold1),
+            logicHolder1,
+            "Holder1",
+            logicVacCryo,
+            false,
+            checkOverlaps);
+	auto logicHolder2 =
+        new G4LogicalVolume(solidHolderNH, _holderMatter, "Holder2", 0, 0, 0);
+	new G4PVPlacement(
+            G4Transform3D(rhold,thold2),
+            logicHolder2,
+            "Holder2",
+            logicVacCryo,
+            false,
+            checkOverlaps);
 
 
     // #################### Pb thin layer
@@ -839,10 +1065,20 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	//5 cylinder sectors: one 60x0.3x60 mm3, four 22x0.3x10 mm3
 	//the angle of the sector theta=2*L^2/R^2, L=lenght of sector, R=external detector radius
 	//the big sector on one side, the 4 small ones on the other side, 2 up and 2 down.
-	G4Tubs *solidLayerThinPb1 = new G4Tubs("solidPbLayerThin1",fDetectorDiameter/2.,(fDetectorDiameter/2.+fLayerThinPbWidth),fLayerThinPbL1/2.,
-		0,((2*fLayerThinPbL1*fLayerThinPbL1)/(fDetectorDiameter/2.*fDetectorDiameter/2.))/2.);
-	G4Tubs *solidLayerThinPb2 = new G4Tubs("solidPbLayerThin2",fDetectorDiameter/2.,(fDetectorDiameter/2.+fLayerThinPbWidth),fLayerThinPbL3/2.,
-		0,((2*fLayerThinPbL2*fLayerThinPbL2)/(fDetectorDiameter/2.*fDetectorDiameter/2.))/2.);
+	G4Tubs *solidLayerThinPb1 =
+        new G4Tubs("solidPbLayerThin1",
+                fDetectorDiameter/2.,
+                (fDetectorDiameter/2.+fLayerThinPbWidth),
+                fLayerThinPbL1/2.,
+                0,
+                ((2*fLayerThinPbL1*fLayerThinPbL1)/(fDetectorDiameter/2.*fDetectorDiameter/2.))/2.);
+	G4Tubs *solidLayerThinPb2 =
+        new G4Tubs("solidPbLayerThin2",
+                fDetectorDiameter/2.,
+                (fDetectorDiameter/2.+fLayerThinPbWidth),
+                fLayerThinPbL3/2.,
+		        0,
+                ((2*fLayerThinPbL2*fLayerThinPbL2)/(fDetectorDiameter/2.*fDetectorDiameter/2.))/2.);
 
 	phiX=0.*deg;
 	phiY=0.*deg;
@@ -853,8 +1089,15 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rpbl1.rotateZ(phiZ);
     G4ThreeVector tpbl1 = G4ThreeVector(0.,0.,
 		(fVacCryoLength/2.-fCapWindowWidth-fDistanceDetectorWindowCap-fDetectorOverHolder-fLayerThinPbL1/2.));
-    logicLayerThinPb1 = new G4LogicalVolume(solidLayerThinPb1, ShieldPbMatter, "LayerThinPb1", 0, 0, 0);
-    physiLayerThinPb1 = new G4PVPlacement(G4Transform3D(rpbl1,tpbl1), logicLayerThinPb1, "LayerThinPb1", logicVacCryo, false, 0);
+    G4LogicalVolume * logicLayerThinPb1 =
+        new G4LogicalVolume(solidLayerThinPb1, _shieldPbMatter, "LayerThinPb1", 0, 0, 0);
+    new G4PVPlacement(
+            G4Transform3D(rpbl1,tpbl1),
+            logicLayerThinPb1,
+            "LayerThinPb1",
+            logicVacCryo,
+            false,
+            checkOverlaps);
 
     phiX=0.*deg;
 	phiY=0.*deg;
@@ -863,9 +1106,18 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rpbl2.rotateX(phiX);
     rpbl2.rotateY(phiY);
     rpbl2.rotateZ(phiZ);
-    G4ThreeVector tpbl2 = G4ThreeVector(0.,0.,(fVacCryoLength/2.-fCapWindowWidth-fDistanceDetectorWindowCap-fDetectorOverHolder-fLayerThinPbL3/2.));
-    logicLayerThinPb2 = new G4LogicalVolume(solidLayerThinPb2, ShieldPbMatter, "LayerThinPb2", 0, 0, 0);
-    physiLayerThinPb2 = new G4PVPlacement(G4Transform3D(rpbl2,tpbl2), logicLayerThinPb2, "LayerThinPb2", logicVacCryo, false, 0);
+    G4ThreeVector tpbl2 =
+        G4ThreeVector(0.,0.,
+                (fVacCryoLength/2.-fCapWindowWidth-fDistanceDetectorWindowCap-fDetectorOverHolder-fLayerThinPbL3/2.));
+    G4LogicalVolume * logicLayerThinPb2 =
+        new G4LogicalVolume(solidLayerThinPb2, _shieldPbMatter, "LayerThinPb2", 0, 0, 0);
+    new G4PVPlacement(
+            G4Transform3D(rpbl2,tpbl2),
+            logicLayerThinPb2,
+            "LayerThinPb2",
+            logicVacCryo,
+            false,
+            checkOverlaps);
 
 
 	phiX=0.*deg;
@@ -875,9 +1127,20 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rpbl3.rotateX(phiX);
     rpbl3.rotateY(phiY);
     rpbl3.rotateZ(phiZ);
-    G4ThreeVector tpbl3 = G4ThreeVector(0.,0.,(fVacCryoLength/2.-fCapWindowWidth-fDistanceDetectorWindowCap-fDetectorOverHolder-9.*fLayerThinPbL3/2.));
-    logicLayerThinPb3 = new G4LogicalVolume(solidLayerThinPb2, ShieldPbMatter, "LayerThinPb3", 0, 0, 0);
-    physiLayerThinPb3 = new G4PVPlacement(G4Transform3D(rpbl3,tpbl3), logicLayerThinPb3, "LayerThinPb3", logicVacCryo, false, 0);
+    G4ThreeVector tpbl3 =
+        G4ThreeVector(0.,
+                0.,
+                (fVacCryoLength/2.-fCapWindowWidth-\
+                 fDistanceDetectorWindowCap-fDetectorOverHolder-9.*fLayerThinPbL3/2.));
+    auto logicLayerThinPb3 =
+        new G4LogicalVolume(solidLayerThinPb2, _shieldPbMatter, "LayerThinPb3", 0, 0, 0);
+    new G4PVPlacement(
+            G4Transform3D(rpbl3,tpbl3),
+            logicLayerThinPb3,
+            "LayerThinPb3",
+            logicVacCryo,
+            false,
+            checkOverlaps);
 
     phiX=0.*deg;
 	phiY=0.*deg;
@@ -886,9 +1149,20 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rpbl4.rotateX(phiX);
     rpbl4.rotateY(phiY);
     rpbl4.rotateZ(phiZ);
-    G4ThreeVector tpbl4 = G4ThreeVector(0.,0.,(fVacCryoLength/2.-fCapWindowWidth-fDistanceDetectorWindowCap-fDetectorOverHolder-fLayerThinPbL3/2.));
-    logicLayerThinPb4 = new G4LogicalVolume(solidLayerThinPb2, ShieldPbMatter, "LayerThinPb4", 0, 0, 0);
-    physiLayerThinPb4 = new G4PVPlacement(G4Transform3D(rpbl4,tpbl4), logicLayerThinPb4, "LayerThinPb4", logicVacCryo, false, 0);
+    G4ThreeVector tpbl4 =
+        G4ThreeVector(0.,
+                0.,
+                (fVacCryoLength/2.-fCapWindowWidth-\
+                   fDistanceDetectorWindowCap-\
+                   fDetectorOverHolder-fLayerThinPbL3/2.));
+    auto logicLayerThinPb4 = new G4LogicalVolume(solidLayerThinPb2, _shieldPbMatter, "LayerThinPb4", 0, 0, 0);
+    new G4PVPlacement(
+            G4Transform3D(rpbl4,tpbl4),
+            logicLayerThinPb4,
+            "LayerThinPb4",
+            logicVacCryo,
+            false,
+            checkOverlaps);
 
     phiX=0.*deg;
 	phiY=0.*deg;
@@ -897,14 +1171,27 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rpbl5.rotateX(phiX);
     rpbl5.rotateY(phiY);
     rpbl5.rotateZ(phiZ);
-    G4ThreeVector tpbl5 = G4ThreeVector(0.,0.,(fVacCryoLength/2.-fCapWindowWidth-fDistanceDetectorWindowCap-fDetectorOverHolder-9*fLayerThinPbL3/2.));
-    logicLayerThinPb5 = new G4LogicalVolume(solidLayerThinPb2, ShieldPbMatter, "LayerThinPb5", 0, 0, 0);
-    physiLayerThinPb5 = new G4PVPlacement(G4Transform3D(rpbl5,tpbl5), logicLayerThinPb5, "LayerThinPb5", logicVacCryo, false, 0);
+    G4ThreeVector tpbl5 =
+        G4ThreeVector(0.,
+                0.,
+                (fVacCryoLength/2.-fCapWindowWidth-fDistanceDetectorWindowCap-fDetectorOverHolder-9*fLayerThinPbL3/2.));
+    auto logicLayerThinPb5 =
+        new G4LogicalVolume(solidLayerThinPb2, _shieldPbMatter, "LayerThinPb5", 0, 0, 0);
+    new G4PVPlacement(
+            G4Transform3D(rpbl5,tpbl5),
+            logicLayerThinPb5,
+            "LayerThinPb5",
+            logicVacCryo,
+            false,
+            checkOverlaps);
 
 
 	// #################### Pb layer
-	G4Tubs* solidLayerPb = new G4Tubs("solidPbLayer", fLayerPbInternalDiameter/2., fLayerPbExternalDiameter/2.,
-									  fLayerPbLength/2., 0, twopi);
+	G4Tubs* solidLayerPb =
+        new G4Tubs("solidPbLayer",
+                fLayerPbInternalDiameter/2.,
+                fLayerPbExternalDiameter/2.,
+				fLayerPbLength/2., 0, twopi);
 	phiX=0.*deg;
 	phiY=0.*deg;
 	phiZ=0.*deg;
@@ -912,13 +1199,23 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rpbl.rotateX(phiX);
     rpbl.rotateY(phiY);
     rpbl.rotateZ(phiZ);
-    G4ThreeVector tpbl = G4ThreeVector(0., 0., -(fHolderLength-fHolderBottomWidth)/2.+fLayerPbLength/2.);
-	logicLayerPb = new G4LogicalVolume(solidLayerPb, LayerPbMatter, "LayerPb", 0, 0, 0);
-	physiLayerPb = new G4PVPlacement(G4Transform3D(rpbl,tpbl), logicLayerPb, "LayerPb", logicHolder1, false, 0);
+    G4ThreeVector tpbl =
+        G4ThreeVector(0.,
+                0.,
+                -(fHolderLength-fHolderBottomWidth)/2.+fLayerPbLength/2.);
+	auto logicLayerPb =
+        new G4LogicalVolume(solidLayerPb, _layerPbMatter, "LayerPb", 0, 0, 0);
+    new G4PVPlacement(
+            G4Transform3D(rpbl,tpbl),
+            logicLayerPb,
+            "LayerPb",
+            logicHolder1,
+            false,
+            checkOverlaps);
 
 
     // #################### Target (sample)
-    G4Box* solidTar1 = new G4Box("solidTar1", fL1/2., fL2/2., fL3/2.);
+    G4Box* solidTar1 = new G4Box("solidTar1", _targetLx/2., _targetLy/2., _targetLz/2.);
 	phiX=0.*deg;
 	phiY=0.*deg;
 	phiZ=0.*deg;
@@ -926,10 +1223,16 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rm1.rotateX(phiX);
     rm1.rotateY(phiY);
     rm1.rotateZ(phiZ);
-	G4ThreeVector tar1 = G4ThreeVector(0.,0.,fL3/2.+9.9*mm);//!!!!check the distance sample-endcap and propagate it to all .mac files
-	logicTarget1 = new G4LogicalVolume(solidTar1,TarMatter,"Target1",0,0,0);
+	G4ThreeVector tar1 = G4ThreeVector(0.,0.,_targetLz/2.+9.9*mm);//!!!!check the distance sample-endcap and propagate it to all .mac files
+	_logicTarget = new G4LogicalVolume(solidTar1,_tarMatter,"Target1",0,0,0);
 	// NCM remove target from the world, to check 60Co -->
-    physiTarget1 = new G4PVPlacement(G4Transform3D(rm1,tar1),logicTarget1,"Target1",logicWorld,false,0);
+    new G4PVPlacement(
+            G4Transform3D(rm1,tar1),
+            _logicTarget,
+            "Target1",
+            _logicWorld,
+            false,
+            checkOverlaps);
 
 
 
@@ -951,128 +1254,133 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	// if(targetRegion) delete targetRegion;
 	// if(detectorRegion) delete detectorRegion;
 	// if(targetRegion) delete targetRegion;
-	targetRegion1 = new G4Region("Target1");
-	targetRegion1->AddRootLogicalVolume(logicTarget1);
+	_targetRegion1 = new G4Region("Target1");
+	_targetRegion1->AddRootLogicalVolume(_logicTarget);
 
     //if(detectorRegion) delete detectorRegion;
-	detectorRegion   = new G4Region("Detector");
-	detectorRegion->AddRootLogicalVolume(_logicDetector);
-	detectorDeadLayerRegion = new G4Region("DetectorDeadLayer");
-	detectorDeadLayerRegion->AddRootLogicalVolume(logicDetectorDeadLayer);
+	_detectorRegion   = new G4Region("Detector");
+	_detectorRegion->AddRootLogicalVolume(_logicDetector);
+	_detectorDeadLayerRegion = new G4Region("DetectorDeadLayer");
+	_detectorDeadLayerRegion->AddRootLogicalVolume(_logicDetectorDeadLayer);
 
 	//if(capRegion) delete capRegion;
-	capRegion = new G4Region("Cap");
-	capRegion->AddRootLogicalVolume(logicCap1);
-	capRegion->AddRootLogicalVolume(logicCap2);
-	capRegion->AddRootLogicalVolume(logicCap3);
+	_capRegion = new G4Region("Cap");
+	_capRegion->AddRootLogicalVolume(logicCap1);
+	_capRegion->AddRootLogicalVolume(logicCap2);
+	_capRegion->AddRootLogicalVolume(logicCap3);
 
     //if(shieldPbRegion) delete shieldPbRegion;
-	shieldPbRegion = new G4Region("ShieldPb");
-	shieldPbRegion->AddRootLogicalVolume(logicPbShield1);
-	shieldPbRegion->AddRootLogicalVolume(logicPbShield2);
-	shieldPbRegion->AddRootLogicalVolume(logicPbShield3);
-	shieldPbRegion->AddRootLogicalVolume(logicPbShield4);
-	shieldPbRegion->AddRootLogicalVolume(logicPbShield5);
-	shieldPbRegion->AddRootLogicalVolume(logicPbShield6);
+	_shieldPbRegion = new G4Region("ShieldPb");
+	_shieldPbRegion->AddRootLogicalVolume(logicPbShield1);
+	_shieldPbRegion->AddRootLogicalVolume(logicPbShield2);
+	_shieldPbRegion->AddRootLogicalVolume(logicPbShield3);
+	_shieldPbRegion->AddRootLogicalVolume(logicPbShield4);
+	_shieldPbRegion->AddRootLogicalVolume(logicPbShield5);
+	_shieldPbRegion->AddRootLogicalVolume(logicPbShield6);
 
 	//if(shieldCuRegion) delete shieldCuRegion;
-	shieldCuRegion = new G4Region("ShieldCu");
-	shieldCuRegion->AddRootLogicalVolume(logicCuShield1);
-	shieldCuRegion->AddRootLogicalVolume(logicCuShield2);
-	shieldCuRegion->AddRootLogicalVolume(logicCuShield3);
-	shieldCuRegion->AddRootLogicalVolume(logicCuShield4);
-	shieldCuRegion->AddRootLogicalVolume(logicCuShield5);
-	shieldCuRegion->AddRootLogicalVolume(logicCuShield6);
+	_shieldCuRegion = new G4Region("ShieldCu");
+	_shieldCuRegion->AddRootLogicalVolume(logicCuShield1);
+	_shieldCuRegion->AddRootLogicalVolume(logicCuShield2);
+	_shieldCuRegion->AddRootLogicalVolume(logicCuShield3);
+	_shieldCuRegion->AddRootLogicalVolume(logicCuShield4);
+	_shieldCuRegion->AddRootLogicalVolume(logicCuShield5);
+	_shieldCuRegion->AddRootLogicalVolume(logicCuShield6);
 
     //supportRegion = new G4Region("Support");
 	//supportRegion->AddRootLogicalVolume(logicSupport);
 
     //if(holderRegion) delete holderRegion;
-	holderRegion = new G4Region("Holder");
-	holderRegion->AddRootLogicalVolume(logicHolder1);
-	holderRegion->AddRootLogicalVolume(logicHolder2);
+	_holderRegion = new G4Region("Holder");
+	_holderRegion->AddRootLogicalVolume(logicHolder1);
+	_holderRegion->AddRootLogicalVolume(logicHolder2);
 
     //if(layerPbRegion) delete layerPbRegion;
-	layerPbRegion = new G4Region("LayerPb");
-	layerPbRegion->AddRootLogicalVolume(logicLayerPb);
-	layerThinPbRegion = new G4Region("LayerThinPb");
-	layerThinPbRegion->AddRootLogicalVolume(logicLayerThinPb1);
-	layerThinPbRegion->AddRootLogicalVolume(logicLayerThinPb2);
-	layerThinPbRegion->AddRootLogicalVolume(logicLayerThinPb3);
-	layerThinPbRegion->AddRootLogicalVolume(logicLayerThinPb4);
-	layerThinPbRegion->AddRootLogicalVolume(logicLayerThinPb5);
+	_layerPbRegion = new G4Region("LayerPb");
+	_layerPbRegion->AddRootLogicalVolume(logicLayerPb);
+	_layerThinPbRegion = new G4Region("LayerThinPb");
+	_layerThinPbRegion->AddRootLogicalVolume(logicLayerThinPb1);
+	_layerThinPbRegion->AddRootLogicalVolume(logicLayerThinPb2);
+	_layerThinPbRegion->AddRootLogicalVolume(logicLayerThinPb3);
+	_layerThinPbRegion->AddRootLogicalVolume(logicLayerThinPb4);
+	_layerThinPbRegion->AddRootLogicalVolume(logicLayerThinPb5);
 
 
 	//--------- Visualization attributes -------------------------------
-	logicWorld->SetVisAttributes(G4VisAttributes::Invisible);
-	G4VisAttributes* TargetVisAtt= new G4VisAttributes(G4Colour(1.0,1.0,1.0));//white
-	logicTarget1->SetVisAttributes(TargetVisAtt);
-	//logicTarget1->SetVisAttributes(G4VisAttributes::Invisible);
-	G4VisAttributes* DetectorVisAtt = new G4VisAttributes(G4Colour(1.0,0.,1.0));//magenta
-	_logicDetector->SetVisAttributes(DetectorVisAtt);
+	_logicWorld->SetVisAttributes(G4VisAttributes::Invisible);
+    auto vis_att= new G4VisAttributes(G4Colour(1.0,1.0,1.0));//white
+	_logicTarget->SetVisAttributes(vis_att);
+    _visAttrs.push_back(vis_att);
+	//_logicTarget->SetVisAttributes(G4VisAttributes::Invisible);
+	vis_att= new G4VisAttributes(G4Colour(1.0,0.,1.0));//magenta
+	_logicDetector->SetVisAttributes(vis_att);
+    _visAttrs.push_back(vis_att);
 	//_logicDetector->SetVisAttributes(G4VisAttributes::Invisible);
-	G4VisAttributes* DeadVisAtt = new G4VisAttributes(G4Color(1.0,0.,0.));//red
-	logicDetectorDeadLayer->SetVisAttributes(DeadVisAtt);
-	//logicDetectorDeadLayer->SetVisAttributes(G4VisAttributes::Invisible);
-	G4VisAttributes* CapVisAtt = new G4VisAttributes(G4Colour(0.,1.0,1.0));//blue
-	logicCap1->SetVisAttributes(CapVisAtt);
+	vis_att=new G4VisAttributes(G4Color(1.0,0.,0.));//red
+	_logicDetectorDeadLayer->SetVisAttributes(vis_att);
+    _visAttrs.push_back(vis_att);
+	//_logicDetectorDeadLayer->SetVisAttributes(G4VisAttributes::Invisible);
+	vis_att = new G4VisAttributes(G4Colour(0.,1.0,1.0));//blue
+	logicCap1->SetVisAttributes(vis_att);
 	//logicCap1->SetVisAttributes(G4VisAttributes::Invisible);
-	logicCap2->SetVisAttributes(CapVisAtt);
+	logicCap2->SetVisAttributes(vis_att);
 	//logicCap2->SetVisAttributes(G4VisAttributes::Invisible);
-	logicCap3->SetVisAttributes(CapVisAtt);
+	logicCap3->SetVisAttributes(vis_att);
+	logicHolder1->SetVisAttributes(vis_att);
+	//logicHolder1->SetVisAttributes(G4VisAttributes::Invisible);
+	logicHolder2->SetVisAttributes(vis_att);
+	//logicHolder2->SetVisAttributes(G4VisAttributes::Invisible);
+    _visAttrs.push_back(vis_att);
 	//logicCap3->SetVisAttributes(G4VisAttributes::Invisible);
-	G4VisAttributes* LeadVisAtt = new G4VisAttributes(G4Colour(0.,0.,1.0));//dark blue
-	logicPbShield1->SetVisAttributes(LeadVisAtt);
+	vis_att = new G4VisAttributes(G4Colour(0.,0.,1.0));//dark blue
+	logicPbShield1->SetVisAttributes(vis_att);
 	//logicPbShield1->SetVisAttributes(G4VisAttributes::Invisible);
-	logicPbShield2->SetVisAttributes(LeadVisAtt);
+	logicPbShield2->SetVisAttributes(vis_att);
 	//logicPbShield2->SetVisAttributes(G4VisAttributes::Invisible);
-	logicPbShield3->SetVisAttributes(LeadVisAtt);
+	logicPbShield3->SetVisAttributes(vis_att);
 	//logicPbShield3->SetVisAttributes(G4VisAttributes::Invisible);
-	logicPbShield4->SetVisAttributes(LeadVisAtt);
+	logicPbShield4->SetVisAttributes(vis_att);
 	//logicPbShield4->SetVisAttributes(G4VisAttributes::Invisible);
-	logicPbShield5->SetVisAttributes(LeadVisAtt);
+	logicPbShield5->SetVisAttributes(vis_att);
 	//logicPbShield5->SetVisAttributes(G4VisAttributes::Invisible);
-	logicPbShield6->SetVisAttributes(LeadVisAtt);
+	logicPbShield6->SetVisAttributes(vis_att);
 	//logicPbShield6->SetVisAttributes(G4VisAttributes::Invisible);
-    logicPbShield7->SetVisAttributes(LeadVisAtt);
+    logicPbShield7->SetVisAttributes(vis_att);
     //logicPbShield7->SetVisAttributes(G4VisAttributes::Invisible);
-    logicPbShield8->SetVisAttributes(LeadVisAtt);
+    logicPbShield8->SetVisAttributes(vis_att);
     //logicPbShield8->SetVisAttributes(G4VisAttributes::Invisible);
-    logicPbShield9->SetVisAttributes(LeadVisAtt);
+    logicPbShield9->SetVisAttributes(vis_att);
     //logicPbShield9->SetVisAttributes(G4VisAttributes::Invisible);
-    logicPbShield10->SetVisAttributes(LeadVisAtt);
+    logicPbShield10->SetVisAttributes(vis_att);
+	//logicLayerPb->SetVisAttributes(G4VisAttributes::Invisible);
+	logicLayerThinPb1->SetVisAttributes(vis_att);
+	//logicLayerThinPb1->SetVisAttributes(G4VisAttributes::Invisible);
+	logicLayerThinPb2->SetVisAttributes(vis_att);
+	//logicLayerThinPb2->SetVisAttributes(G4VisAttributes::Invisible);
+	logicLayerThinPb3->SetVisAttributes(vis_att);
+	//logicLayerThinPb3->SetVisAttributes(G4VisAttributes::Invisible);
+	logicLayerThinPb4->SetVisAttributes(vis_att);
+	//logicLayerThinPb4->SetVisAttributes(G4VisAttributes::Invisible);
+	logicLayerThinPb5->SetVisAttributes(vis_att);
+	//logicLayerThinPb5->SetVisAttributes(G4VisAttributes::Invisible);
+    _visAttrs.push_back(vis_att);
 	//logicPbShield10->SetVisAttributes(G4VisAttributes::Invisible);
-	G4VisAttributes* CopperVisAtt = new G4VisAttributes(G4Colour(1.0,1.0,0.));//yellow
-	logicCuShield1->SetVisAttributes(CopperVisAtt);
+	vis_att = new G4VisAttributes(G4Colour(1.0,1.0,0.));//yellow
+	logicCuShield1->SetVisAttributes(vis_att);
 	//logicCuShield1->SetVisAttributes(G4VisAttributes::Invisible);
-	logicCuShield2->SetVisAttributes(CopperVisAtt);
+	logicCuShield2->SetVisAttributes(vis_att);
 	//logicCuShield2->SetVisAttributes(G4VisAttributes::Invisible);
-	logicCuShield3->SetVisAttributes(CopperVisAtt);
+	logicCuShield3->SetVisAttributes(vis_att);
 	//logicCuShield3->SetVisAttributes(G4VisAttributes::Invisible);
-	logicCuShield4->SetVisAttributes(CopperVisAtt);
+	logicCuShield4->SetVisAttributes(vis_att);
 	//logicCuShield4->SetVisAttributes(G4VisAttributes::Invisible);
-	logicCuShield5->SetVisAttributes(CopperVisAtt);
+	logicCuShield5->SetVisAttributes(vis_att);
 	//logicCuShield5->SetVisAttributes(G4VisAttributes::Invisible);
-	logicCuShield6->SetVisAttributes(CopperVisAtt);
+	logicCuShield6->SetVisAttributes(vis_att);
+    _visAttrs.push_back(vis_att);
 	//logicCuShield6->SetVisAttributes(G4VisAttributes::Invisible);
 	logicVacCryo->SetVisAttributes(G4VisAttributes::Invisible);//logicVaCryo
 	//logicVacCryo->SetVisAttributes(new G4VisAttributes(G4Colour(1.0,1.0,1.0)));//white
-	logicHolder1->SetVisAttributes(CapVisAtt);
-	//logicHolder1->SetVisAttributes(G4VisAttributes::Invisible);
-	logicHolder2->SetVisAttributes(CapVisAtt);
-	//logicHolder2->SetVisAttributes(G4VisAttributes::Invisible);
-	logicLayerPb->SetVisAttributes(LeadVisAtt);
-	//logicLayerPb->SetVisAttributes(G4VisAttributes::Invisible);
-	logicLayerThinPb1->SetVisAttributes(LeadVisAtt);
-	//logicLayerThinPb1->SetVisAttributes(G4VisAttributes::Invisible);
-	logicLayerThinPb2->SetVisAttributes(LeadVisAtt);
-	//logicLayerThinPb2->SetVisAttributes(G4VisAttributes::Invisible);
-	logicLayerThinPb3->SetVisAttributes(LeadVisAtt);
-	//logicLayerThinPb3->SetVisAttributes(G4VisAttributes::Invisible);
-	logicLayerThinPb4->SetVisAttributes(LeadVisAtt);
-	//logicLayerThinPb4->SetVisAttributes(G4VisAttributes::Invisible);
-	logicLayerThinPb5->SetVisAttributes(LeadVisAtt);
-	//logicLayerThinPb5->SetVisAttributes(G4VisAttributes::Invisible);
 
     //------------ set the incident position ------
     //
@@ -1105,10 +1413,12 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
   return physiWorld;
 }
 
+//////////////////////////////////////////////////////////
+//  SENSITIVE DETECTORS IMPLEMENTATION
+/////////////////////////////////////////////////////////
 void gebicDetectorConstruction::ConstructSDandField()
 {
-    // sensitive detectors -----------------------------------------------------
-    auto sdManager = G4SDManager::GetSDMpointer();
+   auto sdManager = G4SDManager::GetSDMpointer();
 
     auto HPGe = new gebicSensitiveDetector("/HPGe");
     sdManager->AddNewDetector(HPGe);
