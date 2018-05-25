@@ -1,14 +1,14 @@
 /*
  *  gebicPhysListEmLowEnergy.cc
- *  
  *
- * 
+ *
+ *
  *  Geant496
  */
- 
+
  //re-checked 25/11/2013
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo...... 
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 
 #include "gebicPhysListEmLowEnergy.hh"
@@ -25,7 +25,7 @@
 #include "G4GammaConversion.hh"
 #include "G4LivermoreGammaConversionModel.hh"
 
-#include "G4RayleighScattering.hh" 
+#include "G4RayleighScattering.hh"
 #include "G4LivermoreRayleighModel.hh"
 
 
@@ -64,7 +64,7 @@
 #include "G4NuclearStopping.hh"
 
 // msc models
-#include "G4UrbanMscModel93.hh"
+//#include "G4UrbanMscModel93.hh"
 #include "G4WentzelVIModel.hh"
 #include "G4GoudsmitSaundersonMscModel.hh"
 #include "G4CoulombScattering.hh"
@@ -88,16 +88,16 @@ void gebicPhysListEmLowEnergy::ConstructProcess()
 {
     // Add EM Processes from G4EmLivermorePhysics builder
 
-  theParticleIterator->reset();
-  while( (*theParticleIterator)() ){
-    G4ParticleDefinition* particle = theParticleIterator->value();
+  GetParticleIterator()->reset();
+  while( (*GetParticleIterator())() ){
+    G4ParticleDefinition* particle = GetParticleIterator()->value();
     G4ProcessManager* pmanager = particle->GetProcessManager();
     G4String particleName = particle->GetParticleName();
 
     G4double LivermoreHighEnergyLimit = 1.*GeV;
-     
+
     if (particleName == "gamma") {
-     
+
       G4PhotoElectricEffect* thePhotoElectricEffect = new G4PhotoElectricEffect();
       G4LivermorePhotoElectricModel* theLivermorePhotoElectricModel = new G4LivermorePhotoElectricModel();
       theLivermorePhotoElectricModel->SetHighEnergyLimit(LivermoreHighEnergyLimit);
@@ -121,34 +121,34 @@ void gebicPhysListEmLowEnergy::ConstructProcess()
       theRayleighModel->SetHighEnergyLimit(LivermoreHighEnergyLimit);
       theRayleigh->AddEmModel(0, theRayleighModel);
       pmanager->AddDiscreteProcess(theRayleigh);
-      
+
     } else if (particleName == "e-") {
-  
+
       G4eMultipleScattering* msc = new G4eMultipleScattering();
       //msc->AddEmModel(0, new G4UrbanMscModel93());
       msc->AddEmModel(0, new G4GoudsmitSaundersonMscModel());
       msc->SetStepLimitType(fUseDistanceToBoundary);
       pmanager->AddProcess(msc,                   -1, 1, 1);
-      
+
       // Ionisation
       G4eIonisation* eIoni = new G4eIonisation();
       G4LivermoreIonisationModel* theIoniLivermore = new G4LivermoreIonisationModel();
-      theIoniLivermore->SetHighEnergyLimit(1.*MeV); 
+      theIoniLivermore->SetHighEnergyLimit(1.*MeV);
       eIoni->AddEmModel(0, theIoniLivermore, new G4UniversalFluctuation() );
-      eIoni->SetStepFunction(0.2, 100*um); //     
+      eIoni->SetStepFunction(0.2, 100*um); //
       pmanager->AddProcess(eIoni,                 -1, 2, 2);
-      
+
       // Bremsstrahlung
       G4eBremsstrahlung* eBrem = new G4eBremsstrahlung();
       G4LivermoreBremsstrahlungModel* theBremLivermore = new G4LivermoreBremsstrahlungModel();
       theBremLivermore->SetHighEnergyLimit(LivermoreHighEnergyLimit);
       eBrem->AddEmModel(0, theBremLivermore);
       pmanager->AddProcess(eBrem, -1,-3, 3);
-	    
+
     } else if (particleName == "e+") {
 
       // Identical to G4EmStandardPhysics_option3
-      
+
       G4eMultipleScattering* msc = new G4eMultipleScattering();
       //msc->AddEmModel(0, new G4UrbanMscModel93());
       msc->AddEmModel(0, new G4GoudsmitSaundersonMscModel());
@@ -156,24 +156,24 @@ void gebicPhysListEmLowEnergy::ConstructProcess()
       pmanager->AddProcess(msc,                   -1, 1, 1);
 
       G4eIonisation* eIoni = new G4eIonisation();
-      eIoni->SetStepFunction(0.2, 100*um);      
+      eIoni->SetStepFunction(0.2, 100*um);
 
       pmanager->AddProcess(eIoni,                 -1, 2, 2);
-      pmanager->AddProcess(new G4eBremsstrahlung, -1,-3, 3);      
+      pmanager->AddProcess(new G4eBremsstrahlung, -1,-3, 3);
       pmanager->AddProcess(new G4eplusAnnihilation,0,-1, 4);
 
-      
-    } else if( particleName == "mu+" || 
+
+    } else if( particleName == "mu+" ||
                particleName == "mu-"    ) {
 
       // Identical to G4EmStandardPhysics_option3
-      
+
       G4MuMultipleScattering* msc = new G4MuMultipleScattering();
       msc->AddEmModel(0, new G4WentzelVIModel());
       pmanager->AddProcess(msc,                       -1, 1, 1);
 
       G4MuIonisation* muIoni = new G4MuIonisation();
-      muIoni->SetStepFunction(0.2, 50*um);          
+      muIoni->SetStepFunction(0.2, 50*um);
 
       pmanager->AddProcess(muIoni,                    -1, 2, 2);
       pmanager->AddProcess(new G4MuBremsstrahlung,    -1,-3, 3);
@@ -194,7 +194,7 @@ void gebicPhysListEmLowEnergy::ConstructProcess()
                particleName == "He3" ) {
 
       // Identical to G4EmStandardPhysics_option3
-      
+
       pmanager->AddProcess(new G4hMultipleScattering, -1, 1, 1);
 
       G4ionIonisation* ionIoni = new G4ionIonisation();
@@ -209,13 +209,13 @@ void gebicPhysListEmLowEnergy::ConstructProcess()
                particleName == "proton" ) {
 
       // Identical to G4EmStandardPhysics_option3
-      
+
       pmanager->AddProcess(new G4hMultipleScattering, -1, 1, 1);
-      
+
       G4hIonisation* hIoni = new G4hIonisation();
       hIoni->SetStepFunction(0.2, 50*um);
 
-      pmanager->AddProcess(hIoni,                     -1, 2, 2);      
+      pmanager->AddProcess(hIoni,                     -1, 2, 2);
       pmanager->AddProcess(new G4hBremsstrahlung,     -1,-3, 3);
       pmanager->AddProcess(new G4hPairProduction,     -1,-4, 4);
     }

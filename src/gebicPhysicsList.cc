@@ -1,11 +1,11 @@
 /*
  *  gebicPhysicsList.cc
- *  
+ *
  *
  *
  *	Geant496
  */
- 
+
  //modified 20/10/2015
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -34,10 +34,10 @@
 #include "G4UnitsTable.hh"
 #include "G4LossTableManager.hh"
 
-#include "HadronPhysicsQGSP_BERT.hh"
-#include "HadronPhysicsQGSP_BIC.hh"
-#include "HadronPhysicsQGSP_BERT_HP.hh"
-#include "HadronPhysicsQGSP_BIC_HP.hh"
+#include "G4HadronPhysicsQGSP_BERT.hh"
+#include "G4HadronPhysicsQGSP_BIC.hh"
+#include "G4HadronPhysicsQGSP_BERT_HP.hh"
+#include "G4HadronPhysicsQGSP_BIC_HP.hh"
 
 #include "G4EmExtraPhysics.hh"
 #include "G4HadronElasticPhysics.hh"
@@ -131,16 +131,16 @@ void gebicPhysicsList::SelectPhysicsList(const G4String& name)
     fHadPhysicsList = new gebicPhysListHadron("hadron");
   } else if (name == "QGSP_BERT") {
     AddExtraBuilders(false);
-    fHadPhysicsList = new HadronPhysicsQGSP_BERT("std-hadron");
+    fHadPhysicsList = new G4HadronPhysicsQGSP_BERT("std-hadron");
   } else if (name == "QGSP_BIC" && !fHadPhysicsList) {
     AddExtraBuilders(false);
-    fHadPhysicsList = new HadronPhysicsQGSP_BIC("std-hadron");
+    fHadPhysicsList = new G4HadronPhysicsQGSP_BIC("std-hadron");
   } else if (name == "QGSP_BERT_HP"  && !fHadPhysicsList) {
     AddExtraBuilders(true);
-    fHadPhysicsList = new HadronPhysicsQGSP_BERT_HP("std-hadron");
+    fHadPhysicsList = new G4HadronPhysicsQGSP_BERT_HP("std-hadron");
   } else if (name == "QGSP_BIC_HP"  && !fHadPhysicsList) {
     AddExtraBuilders(true);
-    fHadPhysicsList = new HadronPhysicsQGSP_BIC_HP("std-hadron");
+    fHadPhysicsList = new G4HadronPhysicsQGSP_BIC_HP("std-hadron");
   } else if (name == "LowEnergy_EM") {
       delete fEmPhysicsList;
       fEmPhysicsList = new gebicPhysListEmLowEnergy("lowe-em");
@@ -148,19 +148,22 @@ void gebicPhysicsList::SelectPhysicsList(const G4String& name)
       delete fEmPhysicsList;
       fEmPhysicsList = new G4EmStandardPhysics();
   } else {
-      G4cout << "gebicPhysicsList WARNING wrong or unkonwn <" 
+      G4cout << "gebicPhysicsList WARNING wrong or unkonwn <"
 	     << name << "> Physics " << G4endl;
   }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void gebicPhysicsList::AddExtraBuilders(G4bool flagHP)
+void gebicPhysicsList::AddExtraBuilders(G4bool /*flagHP*/)
 {
   fNhadcomp = 5;
   fHadronPhys.push_back( new G4EmExtraPhysics("extra EM"));
-  fHadronPhys.push_back( new G4HadronElasticPhysics("elastic",verboseLevel,
+  // XXX migration to G4.10
+  fHadronPhys.push_back( new G4HadronElasticPhysics(verboseLevel));
+  /*fHadronPhys.push_back( new G4HadronElasticPhysics("elastic",verboseLevel,
 						   flagHP));
+                           */
   fHadronPhys.push_back( new G4StoppingPhysics("stopping",verboseLevel));
   fHadronPhys.push_back( new G4IonBinaryCascadePhysics("ionBIC"));
   fHadronPhys.push_back( new G4NeutronTrackingCut("Neutron tracking cut"));
@@ -186,19 +189,19 @@ void gebicPhysicsList::SetCuts()
   region = (G4RegionStore::GetInstance())->GetRegion("DetectorDeadLayer");
   region->SetProductionCuts(fDetectorCuts);
   G4cout << "Detector cuts are set" << G4endl;
-	
+
   if( !fCapCuts ) SetCapCut(fCutForElectron);
   region = (G4RegionStore::GetInstance())->GetRegion("Cap");
   region->SetProductionCuts(fCapCuts);
   region = (G4RegionStore::GetInstance())->GetRegion("Holder");
   region->SetProductionCuts(fCapCuts);
-  G4cout << "Cap and Holder cuts are set" << G4endl;	
-  
+  G4cout << "Cap and Holder cuts are set" << G4endl;
+
   if( !fShieldCuCuts ) SetShieldCuCut(fCutForElectron);
   region = (G4RegionStore::GetInstance())->GetRegion("ShieldCu");
   region->SetProductionCuts(fShieldCuCuts);
   G4cout << "Cu shield cuts are set" << G4endl;
-  
+
   if( !fShieldPbCuts ) SetShieldPbCut(fCutForElectron);
   region = (G4RegionStore::GetInstance())->GetRegion("ShieldPb");
   region->SetProductionCuts(fShieldPbCuts);
@@ -268,7 +271,7 @@ void gebicPhysicsList::SetDetectorCut(G4double cut)
 void gebicPhysicsList::SetCapCut(G4double cut)
 {
 	if( !fCapCuts ) fCapCuts = new G4ProductionCuts();
-	
+
 	fCapCuts->SetProductionCut(cut, idxG4GammaCut);
 	fCapCuts->SetProductionCut(cut, idxG4ElectronCut);
 	fCapCuts->SetProductionCut(cut, idxG4PositronCut);
@@ -278,7 +281,7 @@ void gebicPhysicsList::SetCapCut(G4double cut)
 void gebicPhysicsList::SetShieldCuCut(G4double cut)
 {
 	if( !fShieldCuCuts ) fShieldCuCuts = new G4ProductionCuts();
-	
+
 	fShieldCuCuts->SetProductionCut(cut, idxG4GammaCut);
 	fShieldCuCuts->SetProductionCut(cut, idxG4ElectronCut);
 	fShieldCuCuts->SetProductionCut(cut, idxG4PositronCut);
@@ -288,7 +291,7 @@ void gebicPhysicsList::SetShieldCuCut(G4double cut)
 void gebicPhysicsList::SetShieldPbCut(G4double cut)
 {
 	if( !fShieldPbCuts ) fShieldPbCuts = new G4ProductionCuts();
-	
+
 	fShieldPbCuts->SetProductionCut(cut, idxG4GammaCut);
 	fShieldPbCuts->SetProductionCut(cut, idxG4ElectronCut);
 	fShieldPbCuts->SetProductionCut(cut, idxG4PositronCut);
