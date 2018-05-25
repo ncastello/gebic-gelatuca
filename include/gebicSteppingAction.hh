@@ -7,22 +7,33 @@
 //geometry
 //XXX
 
+#include "G4TransportationManager.hh"
+
 #include "G4UserSteppingAction.hh"
 #include "G4Track.hh"
 #include "G4Step.hh"
 
+
 class gebicSteppingAction : public G4UserSteppingAction
 {
-  public:
-    gebicSteppingAction(){;}
-    virtual ~gebicSteppingAction(){;}
+    public:
+        //
+        gebicSteppingAction()
+        {
+            G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking()->SetPushVerbosity(0);
+        }
+        virtual ~gebicSteppingAction(){;}
 
-    virtual void UserSteppingAction(const G4Step* fStep)
-    {
-        G4Track* fTrack = fStep->GetTrack();
-        G4int StepNo = fTrack->GetCurrentStepNumber();
-        if(StepNo >= 10000) fTrack->SetTrackStatus(fStopAndKill);
-    }
+        virtual void UserSteppingAction(const G4Step* fStep)
+            {
+                G4Track* fTrack = fStep->GetTrack();
+                G4int StepNo = fTrack->GetCurrentStepNumber();
+                if(StepNo >= 10000)
+                {
+                    G4cout << "WARNING (fStopAndKill) stepNo = "<< StepNo << G4endl;
+                    fTrack->SetTrackStatus(fStopAndKill);
+                }
+            }
 };
 
 #endif

@@ -41,6 +41,7 @@ gebicEventAction::gebicEventAction():
     _pulseWidth(1.*microsecond)
 {
     _eventMessenger = new gebicEventActionMessenger(this);
+    G4RunManager::GetRunManager()->SetPrintProgress(10000);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
@@ -61,10 +62,8 @@ gebicEventAction::~gebicEventAction()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
 
-void gebicEventAction::BeginOfEventAction(const G4Event* evt)
-//void gebicEventAction::BeginOfEventAction(const G4Event* evt)
+void gebicEventAction::BeginOfEventAction(const G4Event* /*evt*/)
 {
-    //gebicAnalysisManager::GetInstance()->BeginOfEvent();
     _hitCollectionID = G4SDManager::GetSDMpointer()->GetCollectionID(_hitCollectionName);
 }
 

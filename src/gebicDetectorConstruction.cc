@@ -807,7 +807,7 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     physiDetectorDeadLayer = new G4PVPlacement(G4Transform3D(rdet,tdetDZ), logicDetectorDeadLayer, "DetectorDeadLayer", logicVacCryo, false, 0);
     _logicDetector = new G4LogicalVolume(solidDet, DetectorMatter, "Detector", 0, 0, 0);
     // XXX TO BE REMOVE with Geant4.10
-    this->ConstructSDandField();
+    //this->ConstructSDandField();
     // --> XXX TO BE REMOVE with Geant4.10
 	physiDetector = new G4PVPlacement(G4Transform3D(rdet,tdetDZ), _logicDetector, "Detector", logicVacCryo, false, 0);
 
