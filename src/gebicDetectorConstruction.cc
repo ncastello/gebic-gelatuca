@@ -90,7 +90,6 @@ gebicDetectorConstruction::gebicDetectorConstruction() :
     _capRegion(nullptr),
     _shieldPbRegion(nullptr),
     _shieldCuRegion(nullptr),
-    //_supportRegion(nullptr),
     _holderRegion(nullptr),
     _layerPbRegion(nullptr),
     _layerThinPbRegion(nullptr),
@@ -101,7 +100,6 @@ gebicDetectorConstruction::gebicDetectorConstruction() :
 
 	//Dimensions of the World (G4Box)
     fWorldDiameter	=  900.0*mm;
-	//fWorldLength  = 950.0*mm;
     fWorldLength  = 1050.0*mm;
 
     //Dimensions of the cryostat
@@ -213,7 +211,58 @@ void gebicDetectorConstruction::DefineMaterials()
 	_vacCryoMatter = nistman->FindOrBuildMaterial("G4_Galactic");
 }
 
+void gebicDetectorConstruction::SetG4Polycone()
+{
+    /*
+     Defining the all arguments to construct the Detector volume as a polycon
+        Denote principal axes with
+             0 (0 angle with vertical),
+             1 (90/4 angle with vertical),
+             2 (90/2 angle with vertical),
+             3 (3*90/4 angle with vetical)
+             4 (90 angle with vertical)
+        Denote 1v, 2v, 3v the intersection of DL with axes
+    */
 
+    G4double phiStart=0;
+    G4double phiTotal=0;
+
+    G4double z0,z1,z1v,z2,z2v,z3,z3v,z4;
+    G4double h0,h1,h1v,h2,h2v,h3,h3v,h4,h5,h6,h7,hv,hvv;
+    G4double rDZE0,rDZI1,rDZE1,rDZI1v,rDZE1v,rDZI2,rDZE2,rDZI2v;
+    G4double rDZE2v,rDZI3,rDZE3,rDZI3v,rDZE3v,rDZI4,rDZE4,rDZIv,rDZEv;
+    G4double rDI,rDIv,rDEv;
+
+    // z0, angle with vertical 0
+    rDZE0 = this->fDetectorDiameter/2.-this->fDetectorBulletRadius;
+
+    //z... angle with vertical the angles: 0., 90/4., 90/2., 3*90/4 and 90.
+    z0 = this->fDetectorBulletRadius*(1-0.);
+    z1 = this->fDetectorBulletRadius*(1.-0.924);
+    z2 = this->fDetectorBulletRadius*(1.-0.707);
+    z3 = this->fDetectorBulletRadius*(1.-0.382);
+    z4 = this->fDetectorBulletRadius*(1.-1.);
+
+    h0 = this->fDetectorLength/2.;
+    h1 = h0-z1;
+    h2 = h0-z2;
+    h3 = h0-z3;
+    h4 = h0-z4;
+    h5 =-h0+this->fDetectorHoleLength;
+    h6 = h5-this->fDetectorHoleBulletRadius;
+    h7 =-h0;
+
+    rDZE0 = this->fDetectorDiameter/2. - this->fDetectorBulletRadius;
+    rDZI1 = rDZE0 + TMath::Sqrt((this->fDetectorBulletRadius-this->fDetectorDeadLayer) * \
+                (this->fDetectorBulletRadius - this->fDetectorDeadLayer) - \
+                (this->fDetectorBulletRadius -z1)*( this->fDetectorBulletRadius - z1));
+
+    rDZE1 = rDZE0 + TMath::Sqrt(this->fDetectorBulletRadius*this->fDetectorBulletRadius \
+            - (this->fDetectorBulletRadius-z1)*(this->fDetectorBulletRadius-z1));
+
+
+
+}
 
 G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 {
@@ -254,7 +303,6 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rpb1.rotateY(phiY);
     rpb1.rotateZ(phiZ);
 
-	//G4ThreeVector tpb1 = G4ThreeVector(0.,0.,(-fWorldLength/2.+fShieldPbDim4/2.));
     G4ThreeVector tpb1 = G4ThreeVector(0.,0.,(-fDistanceEndcapFloor-fShieldCuDim4-fShieldPbDim4/2.));
 	G4LogicalVolume* logicPbShield1 =
         new G4LogicalVolume(basePbShield,_shieldPbMatter,"PbShield1",0,0,0);//base Pb
@@ -266,7 +314,6 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
             false,
             checkOverlaps);//base Pb
 
-	//G4ThreeVector tpb2 = G4ThreeVector(0.,0.,(fWorldLength/2.-fShieldPbDim4/2.));
     G4ThreeVector tpb2 = G4ThreeVector(0.,0.,(fDistanceEndcapCeiling+fShieldCuDim4+fShieldPbDim4/2.));
 	G4LogicalVolume* logicPbShield2 =
         new G4LogicalVolume(doorPbShield,_shieldPbMatter,"PbShield2",0,0,0);//door Pb
@@ -279,7 +326,6 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
             checkOverlaps);//top Pb
 
 
-	//G4ThreeVector tpb3 = G4ThreeVector(fShieldPbDim4/2.,(-fWorldDiameter/2.+fShieldPbDim4/2.),-fWorldLength/2.+fShieldPbDim4+fShieldPbDim3/2.);
     G4ThreeVector tpb3 = G4ThreeVector(fShieldPbDim4/2.,
             (-fWorldDiameter/2.+fShieldPbDim4/2.),
             (-fDistanceEndcapFloor-fShieldCuDim4+fShieldPbDim3/2.));
@@ -294,7 +340,6 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
             checkOverlaps);//front wall Pb
 
 
-	//G4ThreeVector tpb4 = G4ThreeVector(-fShieldPbDim4/2.,(fWorldDiameter/2.-fShieldPbDim4/2.),-fWorldLength/2.+fShieldPbDim4+fShieldPbDim3/2.);
     G4ThreeVector tpb4 = G4ThreeVector(-fShieldPbDim4/2.,
             (fWorldDiameter/2.-fShieldPbDim4/2.),
             (-fDistanceEndcapFloor-fShieldCuDim4+fShieldPbDim3/2.));
@@ -316,7 +361,6 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rpb2.rotateY(phiY);
     rpb2.rotateZ(phiZ);
 
-    //G4ThreeVector tpb5 = G4ThreeVector((-fWorldDiameter/2.+fShieldPbDim4/2.),-fShieldPbDim4/2.,-fWorldLength/2.+fShieldPbDim4+fShieldPbDim3/2.);
     G4ThreeVector tpb5 =
         G4ThreeVector((-fWorldDiameter/2.+fShieldPbDim4/2.),
                 -fShieldPbDim4/2.,
@@ -331,7 +375,6 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
             false,
             checkOverlaps);//left wall Pb
 
-	//G4ThreeVector tpb6 = G4ThreeVector((fWorldDiameter/2.-fShieldPbDim4/2.),fShieldPbDim4/2.,-fWorldLength/2.+fShieldPbDim4+fShieldPbDim3/2.);
     G4ThreeVector tpb6 =
         G4ThreeVector((fWorldDiameter/2.-fShieldPbDim4/2.),
                 fShieldPbDim4/2.,
@@ -346,7 +389,6 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
             false,checkOverlaps);//right wall Pb
 
 
-    //G4ThreeVector tpb7 = G4ThreeVector(fShieldPbDim4/2.+25.0*mm,(-fWorldDiameter/2.+fShieldPbDim7/2.),fWorldLength/2.-fShieldPbDim6/2.);
     G4ThreeVector tpb7 =
         G4ThreeVector((fShieldPbDim4/2.+25.0*mm),
                 (-fWorldDiameter/2.+fShieldPbDim7/2.),
@@ -361,7 +403,6 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
             false,
             checkOverlaps);//front wall top Pb
 
-    //G4ThreeVector tpb8 = G4ThreeVector(-fShieldPbDim4/2.-25.0*mm,(fWorldDiameter/2.-fShieldPbDim7/2.),fWorldLength/2.-fShieldPbDim6/2.);
     G4ThreeVector tpb8 =
         G4ThreeVector((-fShieldPbDim4/2.-25.0*mm),
                 (fWorldDiameter/2.-fShieldPbDim7/2.),
@@ -376,7 +417,6 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
             false,
             checkOverlaps);//back wall top Pb
 
-    //G4ThreeVector tpb9 = G4ThreeVector((-fWorldDiameter/2.+fShieldPbDim7/2.),-fShieldPbDim4/2.-25.0*mm,fWorldLength/2.-fShieldPbDim6/2.);
     G4ThreeVector tpb9 =
         G4ThreeVector((-fWorldDiameter/2.+fShieldPbDim7/2.),
                 (-fShieldPbDim4/2.-25.0*mm),
@@ -391,7 +431,6 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
             false,
             checkOverlaps);//left wall top Pb
 
-    //G4ThreeVector tpb10 = G4ThreeVector((fWorldDiameter/2.-fShieldPbDim7/2.),fShieldPbDim4/2.+25.0*mm,fWorldLength/2.-fShieldPbDim6/2.);
     G4ThreeVector tpb10 =
         G4ThreeVector((fWorldDiameter/2.-fShieldPbDim7/2.),
                 (fShieldPbDim4/2.+25.0*mm),
@@ -420,7 +459,6 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
     rcu1.rotateX(phiX);
     rcu1.rotateY(phiY);
     rcu1.rotateZ(phiZ);
-	//G4ThreeVector tcu1 = G4ThreeVector(0.,0.,(-fWorldLength/2.+fShieldPbDim4+fShieldCuDim4/2.));
     G4ThreeVector tcu1 = G4ThreeVector(0.,0.,(-fDistanceEndcapFloor-fShieldCuDim4/2.));
 	G4LogicalVolume* logicCuShield1 =
         new G4LogicalVolume(baseCuShield,_shieldCuMatter,"CuShield1",0,0,0);//base Cu
@@ -432,7 +470,6 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
             false,
             checkOverlaps);//base Cu
 
-	//G4ThreeVector tcu2 = G4ThreeVector(0.,0.,(fWorldLength/2.-fShieldPbDim4-fShieldCuDim4/2.));
     G4ThreeVector tcu2 = G4ThreeVector(0.,0.,(fDistanceEndcapCeiling+fShieldCuDim4/2.));
 	G4LogicalVolume* logicCuShield2 =
         new G4LogicalVolume(doorCuShield,_shieldCuMatter,"CuShield2",0,0,0);//top Cu
@@ -1382,33 +1419,6 @@ G4VPhysicalVolume* gebicDetectorConstruction::Construct()
 	logicVacCryo->SetVisAttributes(G4VisAttributes::Invisible);//logicVaCryo
 	//logicVacCryo->SetVisAttributes(new G4VisAttributes(G4Colour(1.0,1.0,1.0)));//white
 
-    //------------ set the incident position ------
-    //
-    // get the pointer to the User Interface manager
-    //
-    // G4UImanager* UI = G4UImanager::GetUIpointer();
-    //    UI->ApplyCommand("/run/verbose 1");
-    //        UI->ApplyCommand("/event/verbose 2");
-    //        UI->ApplyCommand("/tracking/verbose 1");
-
-    //G4double zpos = -fWorldLength/2.;
-    //  G4double zpos = 0.;
-    //  G4String command = "/gps/pos/centre ";
-    //  std::ostringstream os;
-    //  os << zpos ;
-    //  G4String xs = os.str();
-    //
-    // UI->ApplyCommand(command+"0. 0. "+xs+" mm");
-    // UI->ApplyCommand("/gps/pos/type Point");
-	// UI->ApplyCommand("/gps/pos/shape Cylinder");
-    // UI->ApplyCommand("/gps/position ");
-    // UI->ApplyCommand(command+"0. 0. "+xs+" mm");
-    // UI->ApplyCommand("/gps/particle proton");
-    // UI->ApplyCommand("/gps/direction 0 0 1");
-    // UI->ApplyCommand("/gps/ion 100 MeV");
-    // UI->ApplyCommand("/gps/direction 0 0 1");
-    // UI->ApplyCommand("/gps/energy 100 MeV");
-    //
 
   return physiWorld;
 }
